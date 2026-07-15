@@ -39,7 +39,7 @@ The above models for the apparent wind treat the aircraft as a single point in t
 ```math
 	\bm{\Phi}_W(\bm{s},\bm{R}_\mathrm{IB},t) = \bm{R}_\mathrm{IB}^\mathsf{T} \nabla \bm{W}(\bm{s},t) \bm{R}_\mathrm{IB}
 ```
-Following the approach of Frost, the body-frame gradient of the wind field can be decomposed into its symmetric and skew-symmetric parts,
+The body-frame gradient of the wind field can be decomposed into its symmetric and skew-symmetric parts,
 ```math
 	\bm{\Phi}_W = \frac{1}{2}(\bm{\Phi}_W + \bm{\Phi}_W^\mathsf{T}) + \frac{1}{2}(\bm{\Phi}_W - \bm{\Phi}_W^\mathsf{T})
 ```

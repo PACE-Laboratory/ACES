@@ -50,7 +50,7 @@ where $\bm{W}_\mathrm{res}$ is a Wiener process defined on $\mathbb{R}^{m_\mathr
 	\end{bmatrix} = \bm{g}_\mathrm{res}(\bm{x}_\mathrm{res},\bm{v}_r,\bm{\omega}_r,\bm{x}_\mathrm{aero},\bm{\delta}) \bm{x}_\mathrm{res}
 ```
 
-## Simulated force and moment
+## Simulated Force and Moment
 Altogether, the simulated force and moment are
 ```math
 	\begin{aligned}
@@ -61,7 +61,7 @@ Altogether, the simulated force and moment are
 
 ## Fixed-Wing Aerodynamics
 
-Let the air-relative velocity comprise the components $\bm{r}_r v = [u_r~v_r~w_r]^\mathsf{T}$. Then, the airspeed $V$, angle of attack $\alpha$, and sideslip angle $\beta$ are
+Let the air-relative velocity comprise the components $\bm{v}_r = [u_r~v_r~w_r]^\mathsf{T}$. Then, the airspeed $V$, angle of attack $\alpha$, and sideslip angle $\beta$ are
 ```math
 	\begin{gathered}
 		V = \|\bm{v}_r\| \\
