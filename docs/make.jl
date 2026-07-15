@@ -50,3 +50,8 @@ makedocs(
     # directly from docs/build/ without a local web server.
     format = Documenter.HTML(prettyurls = false),
 )
+
+deploydocs(
+    repo = "github.com/PACE-Laboratory/ACES.git",
+    devbranch = "main",
+)
