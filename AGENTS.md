@@ -6,7 +6,26 @@ ACES (Aircraft Control and Estimation Simulator) is a modular simulation package
 
 - Instantiate: `julia --project=. -e 'using Pkg; Pkg.instantiate()'`
 - Run tests: `julia --project=. -e 'using Pkg; Pkg.test()'`
-- Load package: `julia --project=. -e 'using AircraftSim'`
+- Load package: `julia --project=. -e 'using ACES'`
+
+## Documentation
+
+Documentation is built with Documenter.jl.
+
+- Instantiate documentation dependencies: `julia --project=docs -e 'using Pkg; Pkg.instantiate()'`
+- Build documentation: `julia --project=docs docs/make.jl`
+- Open `docs/build/index.html` to inspect the generated site directly.
+
+The subsystem `THEORY.md` files and `NOTATION.md` are the canonical documentation sources. Keep theory files beside their corresponding subsystems.
+
+- Do not edit or commit `docs/src/notation.md` or `docs/src/theory/`; `docs/make.jl` generates them from the canonical files.
+- Do not commit `docs/build/`.
+- When adding, removing, or renaming a theory file, update `THEORY_PAGES` in `docs/make.jl`.
+- Use `$...$` for inline mathematics without padding inside the delimiters.
+- Use fenced `math` blocks for display equations; do not use `$$...$$`.
+- Link to the notation reference with `[canonical notation](@ref notation)`.
+- Preserve `prettyurls = false` while the generated site is intended to work when opened directly from the filesystem.
+- Before finishing any documentation or theory change, build the complete Documenter site and resolve all warnings, broken references, and rendering errors.
 
 Before finishing a code change, run the narrowest relevant tests and then the complete package test suite.
 

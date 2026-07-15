@@ -1,4 +1,4 @@
-# Notation and Variable Names
+# [Notation and Variable Names](@id notation)
 
 ## Usage Rules
 - This file is the canonical source for mathematical symbols and Julia identifiers.
