@@ -1,38 +1,21 @@
-name: Doc Preview Cleanup
+name: Deployment Cleanup
 
 on:
-  pull_request:
-    types: [closed]
+  workflow_run:
+    workflows: [Documentation]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
 
-# Ensure that only one "Doc Preview Cleanup" workflow is force pushing at a time
 concurrency:
-  group: doc-preview-cleanup
+  group: deployment-cleanup
   cancel-in-progress: false
 
 jobs:
-  doc-preview-cleanup:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout gh-pages branch
-        uses: actions/checkout@v4
-        with:
-          ref: gh-pages
-      - name: Delete preview and history + push changes
-        run: |
-          if [ -d "${preview_dir}" ]; then
-              git config user.name "Documenter.jl"
-              git config user.email "documenter@juliadocs.github.io"
-              git rm -rf "${preview_dir}"
-              git commit -m "delete preview"
-              git branch gh-pages-new "$(echo "delete history" | git commit-tree "HEAD^{tree}")"
-              git push --force origin gh-pages-new:gh-pages
-          fi
-        env:
-          preview_dir: previews/PR${{ github.event.number }}
-
   delete-inactive-deployments:
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     permissions:
       deployments: write
