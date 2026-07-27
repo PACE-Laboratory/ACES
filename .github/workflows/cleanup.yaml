@@ -31,3 +31,46 @@ jobs:
           fi
         env:
           preview_dir: previews/PR${{ github.event.number }}
+
+  delete-inactive-deployments:
+    runs-on: ubuntu-latest
+    permissions:
+      deployments: write
+    steps:
+      - name: Delete inactive deployments
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const deployments = await github.paginate(
+              github.rest.repos.listDeployments,
+              {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                per_page: 100,
+              },
+            );
+
+            let deleted = 0;
+
+            for (const deployment of deployments) {
+              const { data: statuses } =
+                await github.rest.repos.listDeploymentStatuses({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  deployment_id: deployment.id,
+                  per_page: 1,
+                });
+
+              if (statuses[0]?.state !== "inactive") {
+                continue;
+              }
+
+              await github.rest.repos.deleteDeployment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                deployment_id: deployment.id,
+              });
+              deleted += 1;
+            }
+
+            core.info(`Deleted ${deleted} inactive deployment(s).`);
