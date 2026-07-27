@@ -13,7 +13,6 @@ Symbols and Julia identifiers follow the [canonical notation](@ref notation).
 - Measurement model state, $\bm{x}_\mathrm{meas} \in \mathbb{R}^{n_\mathrm{meas}}$
 - Estimator state, $\bm{x}_\mathrm{est} \in \mathbb{R}^{n_\mathrm{est}}$
 - Simulation state, $\bm{x} \in \mathbb{R}^{n_x}$
-- Control input, $\bm{u} \in \mathbb{R}^{p_\mathrm{ctrl}}$
 - Time, $t \in \mathbb{R}_+$
 
 **Outputs:**
@@ -25,13 +24,13 @@ Symbols and Julia identifiers follow the [canonical notation](@ref notation).
 
 The measured output $\bm{y}_\mathrm{meas} \in \mathbb{R}^{p_\mathrm{meas}}$ of a system may be assumed to satisfy either
 ```math
-	\bm{y}_\mathrm{meas} = \bm{h}_\mathrm{meas}(\bm{x},\bm{u},t) + \tilde{\bm{v}}_\mathrm{meas}
+	\bm{y}_\mathrm{meas} = \bm{h}_\mathrm{meas}(\bm{x},t) + \tilde{\bm{v}}_\mathrm{meas}
 ```
 where $\tilde{\bm{v}}_\mathrm{meas} \in \mathbb{R}^{m_\mathrm{est}}$ is the measurment disturbance (typically assumed to be zero-mean Gaussian white noise), or more formally, the stochastic input-output system
 ```math
 	\begin{aligned}
-		\mathrm{d}\bm{x}_\mathrm{meas} &= \bm{f}_\mathrm{meas}(\bm{x}_\mathrm{meas},\bm{x},\bm{u},t) \mathrm{d}t + \bm{\sigma}_\mathrm{meas} (\bm{x}_\mathrm{meas},\bm{x},\bm{u},t) \mathrm{d}\bm{W}_\mathrm{meas} \\
-		\bm{y}_\mathrm{meas} &= \bm{h}_\mathrm{meas}(\bm{x}_\mathrm{meas},\bm{x},\bm{u},t)
+		\mathrm{d}\bm{x}_\mathrm{meas} &= \bm{f}_\mathrm{meas}(\bm{x}_\mathrm{meas},\bm{x},t) \mathrm{d}t + \bm{\sigma}_\mathrm{meas} (\bm{x}_\mathrm{meas},\bm{x},t) \mathrm{d}\bm{W}_\mathrm{meas} \\
+		\bm{y}_\mathrm{meas} &= \bm{h}_\mathrm{meas}(\bm{x}_\mathrm{meas},\bm{x},t)
 	\end{aligned}
 ```
 where $\bm{x}_\mathrm{meas} \in \mathbb{R}^{n_\mathrm{meas}}$ is the measurement-model state and $\bm{W}_\mathrm{meas}$ is a Wiener process defined on $\mathbb{R}^{m_\mathrm{meas}}$. Although this more formal formulation does not permit additive white noise to enter $\bm{y}_\mathrm{meas}$ directly, it can pose difficulties for numerical integration schemes and is therefore avoided. Moreover, real sensors and low-level navigation solutions are not directly perturbed by white noise.
@@ -41,9 +40,9 @@ In general, consider the state and/or disturbance estimation dynamical system
 ```math
 	\dot{\bm{x}}_\mathrm{est} = \bm{f}'_\mathrm{est}(\bm{x}_\mathrm{est},\bm{y}_\mathrm{meas},\bm{u}_\mathrm{est},t)
 ```
-where $\bm{x}_\mathrm{est} \in \mathbb{R}^{n_est}$ is the state of the estimator and $\bm{u}_\mathrm{est} \in \mathbb{R}^{m_est}$ is the input (known signal) for the purpose of designing and implementing the state estimation scheme. For simulation, we assume the mapping $(\bm{x},\bm{u})\mapsto \bm{u}_\mathrm{est}$ is implmented in the estimator dynamics model such that 
+where $\bm{x}_\mathrm{est} \in \mathbb{R}^{n_est}$ is the state of the estimator and $\bm{u}_\mathrm{est} \in \mathbb{R}^{m_est}$ is the input (known signal) for the purpose of designing and implementing the state estimation scheme. For simulation, we assume the mapping $\bm{x} \mapsto \bm{u}_\mathrm{est}$ is implemented in the estimator dynamics model such that
 ```math
-	\dot{\bm{x}}_\mathrm{est} = \bm{f}_\mathrm{est}(\bm{x}_\mathrm{est},\bm{y}_\mathrm{meas},\bm{x},\bm{u},t)
+	\dot{\bm{x}}_\mathrm{est} = \bm{f}_\mathrm{est}(\bm{x}_\mathrm{est},\bm{y}_\mathrm{meas},\bm{x},t)
 ```
 The extended state estimate $\hat{\bm{x}} \in \mathbb{R}^{p_\mathrm{est}}$ (the output of the state estimation system) satisfies
 ```math
@@ -51,7 +50,7 @@ The extended state estimate $\hat{\bm{x}} \in \mathbb{R}^{p_\mathrm{est}}$ (the 
 ```
 which need not be an estimate of the entire state vector $\bm{x}$. For simulation, we assume 
 ```math
-	\hat{\bm{x}} = \bm{h}_\mathrm{est}(\bm{x}_\mathrm{est},\bm{y}_\mathrm{meas},\bm{x},\bm{u},t)
+	\hat{\bm{x}} = \bm{h}_\mathrm{est}(\bm{x}_\mathrm{est},\bm{y}_\mathrm{meas},\bm{x},t)
 ```
 
 ## Relationship to the Extended Kalman Filter

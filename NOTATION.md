@@ -22,6 +22,9 @@
 | --------------------- | ---------------- | -------------- | ---- | ----------- |
 | $t$ | `t` | `t` | 1 | Time |
 | $\bm{x}$ | `x` | `x` | $n_x$ (`n_x`) | Simulation (extended) state vector |
+| $\bm{f}$ | `simulation_drift!()` | `simulation_drift!()` | $n_x$ | Assembled extended-state drift vector |
+| $\bm{G}$ | `simulation_diffusion!()` | `simulation_diffusion!()` | $n_x$ × $m_x$ | Assembled extended-state diffusion matrix |
+| $m_x$ | `noise_dimension(model)` | `noise_dimension(model)` | 1 | Total number of independent Wiener-process inputs |
 
 ### Rigid-Body Dynamics
 | Mathematical notation | Julia identifier | ASCII fallback | Size | Description |
@@ -85,7 +88,7 @@
 | $\delta \bm{M}$ | `δM` | `delta_M` | 3 | Moment model residual |
 | $\bm{f}_\mathrm{res}$ | `f_res` | `f_res` | $(\cdot) \to \mathbb{R}^{n_\mathrm{res}}$ | Aerodynamic model residual drift vector field |
 | $\bm{\sigma}_\mathrm{res}$ | `σ_res` | `sigma_res` | $(\cdot) \to \mathbb{R}^{n_\mathrm{res} \times m_\mathrm{res}}$ | Aerodynamic model residual diffusion matrix field |
-| $\bm{g}_\mathrm{res}$ | `g_res` | `g_res` | $(\cdot) \to \mathbb{R}^6$ | Output function of the aerodynamic residual model |
+| $\bm{g}_\mathrm{res}$ | `g_res` | `g_res` | $(\cdot) \to \mathbb{R}^{6 \times n_\mathrm{res}}$ | Output matrix of the aerodynamic residual model |
 | $V$ | `V` | `V` | 1 | Airspeed |
 | $\alpha$ | `α` | `alpha` | 1 | Angle of attack |
 | $\beta$ | `β` | `beta` | 1 | Sideslip angle |
@@ -125,7 +128,7 @@
 | $\bm{\sigma}_\mathrm{meas}$ | `σ_meas` | `sigma_meas` | $(\cdot) \to \mathbb{R}^{n_\mathrm{meas} \times m_\mathrm{meas}}$ | Measurement model diffusion matrix field |
 | $\bm{h}_\mathrm{meas}$ | `h_meas` | `h_meas` | $(\cdot) \to \mathbb{R}^{p_\mathrm{meas}}$ | Measurement model output map |
 | $\bm{x}_\mathrm{est}$ | `x_est` | `x_est` | $n_\mathrm{est}$ (`n_est`) | Estimator state |
-| $\hat{\bm{x}}$ | `x_hat` | `x_hat` | $p_\mathrm{est}$ (`p_est`) | Extended state estimate |
+| $\hat{\bm{x}}$ | `xhat` | `xhat` | $p_\mathrm{est}$ (`p_est`) | Extended state estimate |
 | $\bm{f}_\mathrm{est}$ | `f_est` | `f_est` | $(\cdot) \to \mathbb{R}^{n_\mathrm{est}}$ | Estimator dynamics vector field used by the simulation |
 | $\bm{h}_\mathrm{est}$ | `h_est` | `h_est` | $(\cdot) \to \mathbb{R}^{p_\mathrm{est}}$ | Estimator output map used by the simulation |
 

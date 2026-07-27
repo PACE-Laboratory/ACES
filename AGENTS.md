@@ -29,6 +29,21 @@ The subsystem `THEORY.md` files and `NOTATION.md` are the canonical documentatio
 
 Before finishing a code change, run the narrowest relevant tests and then the complete package test suite.
 
+
+## Markdown and mathematical formatting
+
+- Do not hard-wrap Markdown prose at a fixed column width.
+- Keep each prose paragraph on one physical line.
+- Keep display equations on one physical line whenever the complete equation is 200 characters or fewer.
+- Do not insert line breaks after `=`, `+`, `-`, `\times`, or other binary operators merely to limit line length.
+- Markdown prose line-length conventions do not apply inside `math` fences or other mathematical environments.
+- Break an equation across lines only when it is genuinely too long to read as one line or when multiple aligned equations require a structured multiline environment.
+- When a mathematical expression must span multiple lines, use an appropriate LaTeX environment such as `aligned`, and break at meaningful semantic boundaries.
+- Preserve the existing layout of equations unless changing it is necessary for correctness.
+- Do not add sentence punctuation, such as a period, comma, semicolon, or colon, to the end of a display equation
+- A display equation should remain unpunctuated even when it completes a sentence
+- Retain punctuation that is mathematically meaningful, such as commas separating elements, arguments, coordinates, or conditions
+
 ## Architecture
 
 - `types.jl`: shared aliases, enums, and abstract interfaces

@@ -22,11 +22,11 @@ Symbols and Julia identifiers follow the [canonical notation](@ref notation).
 ## General control law form
 The controller has the dynamics
 ```math
-    \dot{\bm{x}}_\mathrm{ctrl} = \bm{f}_\mathrm{ctrl}(\bm{x}_\mathrm{ctrl},\bm{x}_\mathrm{rb},\bm{\delta},\bm{w},\hat{\bm{x}},t)
+    \dot{\bm{x}}_\mathrm{ctrl} = \bm{f}_\mathrm{ctrl}(\bm{x}_\mathrm{ctrl},\bm{x}_\mathrm{rb},\bm{\delta},\bm{\varpi},\hat{\bm{x}},t)
 ```
 where $\bm{x}_\mathrm{ctrl} \in \mathbb{R}^{n_\mathrm{ctrl}}$ is the state of the controller. The control input (the output of the contoller) is
 ```math
-    \bm{u} = \bm{h}_\mathrm{ctrl}(\bm{x}_\mathrm{ctrl},\bm{x}_\mathrm{rb},\bm{\delta},\bm{w},\hat{\bm{x}},t)
+    \bm{u} = \bm{h}_\mathrm{ctrl}(\bm{x}_\mathrm{ctrl},\bm{x}_\mathrm{rb},\bm{\delta},\bm{\varpi},\hat{\bm{x}},t)
 ```
 
 ### Common Control Law Architectures

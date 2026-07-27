@@ -240,4 +240,4 @@ Altogether, the state of the rigid body is
 		\bm{\nu}
 	\end{bmatrix} \in \mathbb{R}^{n_\mathrm{rb}}
 ```
-where $n_\mathrm{rb} = n_\mathrm{pose} + 9$.
+where $n_\mathrm{rb} = n_\mathrm{pose} + 6$.

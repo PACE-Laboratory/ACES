@@ -1,15 +1,19 @@
 # ACES
 
-ACES (Aircraft Control and Estimation Simulator) is a modular Julia package for
-aircraft flight dynamics, control, and estimation.
+ACES (Aircraft Control and Estimation Simulator) is a modular Julia package for aircraft flight dynamics, control, and estimation.
 
-The [notation reference](@ref notation) defines the
-canonical mathematical symbols and Julia identifiers used throughout the
-subsystem theory.
+The [notation reference](@ref notation) defines the canonical mathematical symbols and Julia identifiers used throughout the subsystem theory and code documentation.
 
 ## Theory
 
 ```@contents
 Pages = Main.THEORY_PAGE_PATHS
+Depth = 1
+```
+
+## Code Documentation
+
+```@contents
+Pages = Main.CODE_PAGE_PATHS
 Depth = 1
 ```
