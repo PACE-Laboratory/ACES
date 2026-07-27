@@ -1,0 +1,29 @@
+name: Delete All Deployments
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Deployment environment to purge
+        required: true
+        default: github-pages
+        type: string
+      confirm:
+        description: Confirm deletion of every matching deployment
+        required: true
+        default: false
+        type: boolean
+
+jobs:
+  delete-all-deployments:
+    if: inputs.confirm
+    runs-on: ubuntu-latest
+    permissions:
+      deployments: write
+    steps:
+      - name: Delete all deployments
+        uses: strumwolf/delete-deployment-environment@v4
+        with:
+          token: ${{ github.token }}
+          environment: ${{ inputs.environment }}
+          onlyRemoveDeployments: true
