@@ -9,11 +9,10 @@ Symbols and Julia identifiers follow the [canonical notation](@ref notation).
 
 **Inputs:**
 - Controller state, $\bm{x}_\mathrm{ctrl} \in \mathbb{R}^{n_\mathrm{ctrl}}$
-- Rigid body state, $\bm{x}_\mathrm{rb}$
-- Actuator state, $\bm{\delta} \in \mathbb{R}^{p_\mathrm{act}}$
+- Rigid body state, $\bm{x}_\mathrm{rb} \in \mathbb{R}^{n_\mathrm{rb}}$
 - Generalized wind velocity, $\bm{\varpi} \in \mathbb{R}^6$
 - Extended state estimate, $\hat{\bm{x}} \in \mathbb{R}^{p_\mathrm{est}}$
-- Time, $t$
+- Time, $t \in \mathbb{R}$
 
 **Outputs:**
 - Control input, $\bm{u} \in \mathbb{R}^{p_\mathrm{ctrl}}$
@@ -22,11 +21,11 @@ Symbols and Julia identifiers follow the [canonical notation](@ref notation).
 ## General control law form
 The controller has the dynamics
 ```math
-    \dot{\bm{x}}_\mathrm{ctrl} = \bm{f}_\mathrm{ctrl}(\bm{x}_\mathrm{ctrl},\bm{x}_\mathrm{rb},\bm{\delta},\bm{\varpi},\hat{\bm{x}},t)
+    \dot{\bm{x}}_\mathrm{ctrl} = \bm{f}_\mathrm{ctrl}(\bm{x}_\mathrm{ctrl},\bm{x}_\mathrm{rb},\bm{\varpi},\hat{\bm{x}},t)
 ```
 where $\bm{x}_\mathrm{ctrl} \in \mathbb{R}^{n_\mathrm{ctrl}}$ is the state of the controller. The control input (the output of the contoller) is
 ```math
-    \bm{u} = \bm{h}_\mathrm{ctrl}(\bm{x}_\mathrm{ctrl},\bm{x}_\mathrm{rb},\bm{\delta},\bm{\varpi},\hat{\bm{x}},t)
+    \bm{u} = \bm{h}_\mathrm{ctrl}(\bm{x}_\mathrm{ctrl},\bm{x}_\mathrm{rb},\bm{\varpi},\hat{\bm{x}},t)
 ```
 
 ### Common Control Law Architectures

@@ -23,7 +23,7 @@
 | $t$ | `t` | `t` | 1 | Time |
 | $\bm{x}$ | `x` | `x` | $n_x$ (`n_x`) | Simulation (extended) state vector |
 | $\bm{f}$ | `simulation_drift!()` | `simulation_drift!()` | $n_x$ | Assembled extended-state drift vector |
-| $\bm{G}$ | `simulation_diffusion!()` | `simulation_diffusion!()` | $n_x$ × $m_x$ | Assembled extended-state diffusion matrix |
+| $\bm{\sigma}$ | `simulation_diffusion!()` | `simulation_diffusion!()` | $n_x$ × $m_x$ | Assembled extended-state diffusion matrix |
 | $m_x$ | `noise_dimension(model)` | `noise_dimension(model)` | 1 | Total number of independent Wiener-process inputs |
 
 ### Rigid-Body Dynamics

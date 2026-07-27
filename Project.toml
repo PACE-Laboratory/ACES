@@ -4,14 +4,18 @@ version = "0.0.1"
 authors = ["Jeremy Hopwood <jhopwood@ae.msstate.edu>"]
 
 [deps]
-DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+OrdinaryDiffEqDefault = "50262376-6c5a-4cf5-baba-aaf4f84d72d7"
+SciMLBase = "0bca4576-84f4-4d90-8ffe-ffa030f20462"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+StochasticDiffEqLowOrder = "d15fe365-ce7f-450a-828a-7985bd5b681b"
 
 [compat]
-DifferentialEquations = "7.17.0"
 LinearAlgebra = "1.12.0"
+OrdinaryDiffEqDefault = "1.14.0"
+SciMLBase = "2.155.1"
 StaticArrays = "1.9.15"
+StochasticDiffEqLowOrder = "1.1.0"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

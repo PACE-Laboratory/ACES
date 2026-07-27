@@ -1,6 +1,6 @@
 using ACES
-using DifferentialEquations
 using LinearAlgebra
+using SciMLBase: ODEProblem, SDEProblem
 using Test
 
 # This module deliberately lives outside ACES and demonstrates the supported
@@ -108,6 +108,14 @@ end
     simulation_diffusion!(G, stochastic_x0, stochastic_aircraft, 0.0)
     @test G[state_layout(stochastic_aircraft).measurement, :] ≈
           reshape([0.2], 1, 1)
+    stochastic_solution = simulate(
+        stochastic_aircraft,
+        stochastic_x0,
+        (0.0, 0.01);
+        abstol=1e-4,
+        reltol=1e-4,
+    )
+    @test stochastic_solution.t[end] == 0.01
 
     invalid_controller = FunctionController(
         0,

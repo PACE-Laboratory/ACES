@@ -16,7 +16,7 @@ Documentation is built with Documenter.jl.
 - Build documentation: `julia --project=docs docs/make.jl`
 - Open `docs/build/index.html` to inspect the generated site directly.
 
-The subsystem `THEORY.md` files and `NOTATION.md` are the canonical documentation sources. Keep theory files beside their corresponding subsystems.
+The subsystem `THEORY.md` files and `NOTATION.md` are the canonical sources for mathematics and notation. The subsystem `CODE.md` files are the canonical sources for Julia implementation and API documentation. Keep both beside their corresponding subsystems.
 
 - Do not edit or commit `docs/src/notation.md` or `docs/src/theory/`; `docs/make.jl` generates them from the canonical files.
 - Do not commit `docs/build/`.
@@ -29,6 +29,22 @@ The subsystem `THEORY.md` files and `NOTATION.md` are the canonical documentatio
 
 Before finishing a code change, run the narrowest relevant tests and then the complete package test suite.
 
+## Theory and Code Documentation Synchronization
+
+The nearest applicable `THEORY.md` is the canonical source for mathematical definitions, assumptions, equations, conventions, and invariants. Julia source code must implement that documented theory; do not treat the implementation as authority when it conflicts with `THEORY.md`.
+
+The nearest applicable `CODE.md` is the canonical implementation and API documentation for the corresponding Julia source files. Keep each `CODE.md` synchronized with the Julia implementation.
+
+Whenever modifying a Julia file:
+
+1. Read the nearest applicable `THEORY.md` and `CODE.md` before making the change.
+2. Preserve the equations, conventions, and invariants established by `THEORY.md`.
+3. In the same change, update `CODE.md` to reflect every affected public API, type, function, argument, return value, state layout, interface contract, behavior, usage example, or architectural relationship.
+4. If the mathematical formulation changes, update `THEORY.md`, the Julia implementation, `CODE.md`, and the tests together.
+5. If the implementation changes without altering the mathematics, leave `THEORY.md` unchanged but update `CODE.md` wherever the documented implementation or usage is affected.
+6. Treat any disagreement between `THEORY.md`, Julia code, `CODE.md`, or tests as a blocking inconsistency. Report it rather than choosing one silently.
+
+Internal refactoring that has no observable effect and does not invalidate anything stated in `CODE.md` does not require a documentation edit, but this must be verified rather than assumed.
 
 ## Markdown and mathematical formatting
 

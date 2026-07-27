@@ -2,8 +2,10 @@
 module ACES
 
 using StaticArrays
-using DifferentialEquations
 using LinearAlgebra
+using OrdinaryDiffEqDefault: DefaultODEAlgorithm
+using SciMLBase: ODEProblem, SDEProblem, solve
+using StochasticDiffEqLowOrder: LambaEM
 
 # Model files share the ACES module. Keep this order aligned with the physical
 # signal flow: rigid-body/environment definitions precede wind and aerodynamic

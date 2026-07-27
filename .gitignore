@@ -37,3 +37,6 @@ JuliaLocalPreferences.toml
 
 # VS Code
 .vscode
+
+# Draw.io backup files
+*.drawio.bkp

@@ -3,13 +3,10 @@ using Documenter
 const REPOSITORY_ROOT = normpath(joinpath(@__DIR__, ".."))
 const DOCUMENTATION_SOURCE = joinpath(@__DIR__, "src")
 
-# Load the package directly from this checkout so `@docs` blocks always
-# describe the same source revision as the canonical Markdown files.
-push!(LOAD_PATH, REPOSITORY_ROOT)
 using ACES
 
 const THEORY_PAGES = [
-    ("Simulation Assembly", "src/THEORY.md", "theory/simulation.md"),
+    ("Simulation", "src/THEORY.md", "theory/simulation.md"),
     ("Rigid-Body Dynamics", "src/models/rigid_body/THEORY.md", "theory/rigid-body.md"),
     ("Environment", "src/models/environment/THEORY.md", "theory/environment.md"),
     ("Wind", "src/models/wind/THEORY.md", "theory/wind.md"),
@@ -20,7 +17,7 @@ const THEORY_PAGES = [
 ]
 
 const CODE_PAGES = [
-    ("Simulation Assembly", "src/CODE.md", "code/simulation.md"),
+    ("Simulation", "src/CODE.md", "code/simulation.md"),
     ("Rigid-Body Dynamics", "src/models/rigid_body/CODE.md", "code/rigid-body.md"),
     ("Environment", "src/models/environment/CODE.md", "code/environment.md"),
     ("Wind", "src/models/wind/CODE.md", "code/wind.md"),
@@ -67,10 +64,8 @@ makedocs(
     pages = [
         "Home" => "index.md",
         "Notation" => "notation.md",
+        "Documentation" => [title => destination for (title, _, destination) in CODE_PAGES],
         "Theory" => [title => destination for (title, _, destination) in THEORY_PAGES],
-        "Code Documentation" => [
-            title => destination for (title, _, destination) in CODE_PAGES
-        ],
     ],
     # Emit links to concrete HTML files so the site also works when opened
     # directly from docs/build/ without a local web server.

@@ -622,7 +622,7 @@ function validate(
 end
 
 # -----------------------------------------------------------------------------
-# DifferentialEquations.jl problem construction and solve
+# SciML problem construction and solve
 # -----------------------------------------------------------------------------
 
 """
@@ -660,9 +660,10 @@ end
 """
     simulate(model, x0, tspan; solver=nothing, kwargs...)
 
-Build and solve the appropriate DifferentialEquations.jl problem. Supplying
-`solver` overrides the library default; all other keywords are forwarded to
-`solve`.
+Build and solve the appropriate SciML problem. By default, deterministic
+problems use the standard automatic ODE algorithm and general-noise stochastic
+problems use adaptive Euler-Maruyama. Supplying `solver` overrides that choice;
+all other keywords are forwarded to `solve`.
 """
 function simulate(
     model::AircraftModel,
@@ -672,7 +673,10 @@ function simulate(
     kwargs...,
 )
     problem = simulation_problem(model, x0, tspan)
-    return isnothing(solver) ?
-           solve(problem; kwargs...) :
-           solve(problem, solver; kwargs...)
+    if !isnothing(solver)
+        return solve(problem, solver; kwargs...)
+    end
+    default_solver =
+        problem isa ODEProblem ? DefaultODEAlgorithm() : LambaEM()
+    return solve(problem, default_solver; kwargs...)
 end

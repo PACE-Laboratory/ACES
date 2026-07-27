@@ -47,7 +47,7 @@ Keywords for zero-dimensional states may be omitted. Keywords for nonzero-dimens
 
 Call `validate(model, x0)` before a simulation when constructing or debugging a custom model. `simulation_problem` and `simulate` perform the same initial preflight automatically.
 
-`simulation_problem` returns an `ODEProblem` when the total noise dimension is zero and an `SDEProblem` otherwise. `simulate` forwards solver and tolerance keywords to DifferentialEquations.jl:
+`simulation_problem` returns an `ODEProblem` when the total noise dimension is zero and an `SDEProblem` otherwise. With no explicit `solver`, `simulate` uses SciML's standard automatic ODE algorithm for deterministic problems and adaptive Euler-Maruyama for general-noise stochastic problems. An explicit solver and all other solver keywords are forwarded to SciML:
 
 ```julia
 validate(model, x0)
