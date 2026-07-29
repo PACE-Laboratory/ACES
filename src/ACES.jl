@@ -28,7 +28,7 @@ export AbstractRigidBodyModel, AbstractAttitudeRepresentation,
        pose_dimension, state_view, cpem, cpeminv, R_IB, L_IB, Ξ, Ω,
        J_η, f_η, ℳ, f_ν, rigid_body_dynamics
 export AbstractEnvironmentModel, AbstractGravityModel, AbstractDensityModel,
-       Environment, UniformGravity, ExponentialDensity,
+       Environment, UniformGravity, ConstantDensity, ExponentialDensity,
        NASAMetricAtmosphere, altitude, gravity, density, environment
 export AbstractWindModel, ConstantWind, FrozenWindField, ShapingFilterWind,
        body_wind_gradient, wind_angular_velocity,

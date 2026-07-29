@@ -45,6 +45,7 @@ ACES.AbstractGravityModel
 ACES.AbstractDensityModel
 ACES.Environment
 ACES.UniformGravity
+ACES.ConstantDensity
 ACES.ExponentialDensity
 ACES.NASAMetricAtmosphere
 ```

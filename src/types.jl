@@ -64,11 +64,11 @@ abstract type AbstractController end
 # Traits shared by deterministic and stochastic models
 # -----------------------------------------------------------------------------
 
-"""Return an empty, statically sized state vector with scalar type `T`."""
+"""Return an empty statically sized state vector with scalar type `T`."""
 empty_state(::Type{T}=RealT) where {T<:Real} = SVector{0,T}()
 
-"""Return the number of continuous states carried by `model`."""
+"""Return the number of states of `model`."""
 state_dimension(model) = throw(MethodError(state_dimension, (model,)))
 
-"""Return the number of independent Wiener-process inputs carried by `model`."""
+"""Return the number of independent Wiener process inputs carried by `model`."""
 noise_dimension(::Any) = 0
