@@ -19,6 +19,7 @@ include("models/actuators/actuators.jl")
 include("models/estimation/estimation.jl")
 include("models/control/control.jl")
 include("core.jl")
+include("plotting.jl")
 
 # Public API grouped by subsystem in the same order as the includes above.
 export RealT, Vec3, Vec4, Vec6, Mat3, empty_state, state_dimension,
@@ -47,5 +48,6 @@ export AbstractController, LinearStateFeedback, LinearOutputFeedback,
 export AircraftModel, StateLayout, state_layout, state_components,
        initial_state, validate, simulation_signals, simulation_drift!,
        simulation_diffusion!, simulation_problem, simulate
+export plot_rigid_body, plot_controls
 
 end

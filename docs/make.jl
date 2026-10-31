@@ -18,6 +18,7 @@ const THEORY_PAGES = [
 
 const CODE_PAGES = [
     ("Simulation", "src/CODE.md", "code/simulation.md"),
+    ("Plotting", "ext/CODE.md", "code/plotting.md"),
     ("Rigid-Body Dynamics", "src/models/rigid_body/CODE.md", "code/rigid-body.md"),
     ("Environment", "src/models/environment/CODE.md", "code/environment.md"),
     ("Wind", "src/models/wind/CODE.md", "code/wind.md"),

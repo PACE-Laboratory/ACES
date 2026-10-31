@@ -56,6 +56,10 @@ solution = simulate(model, x0, (0.0, 10.0); abstol=1e-9, reltol=1e-9)
 
 The in-place drift and diffusion functions are public for advanced workflows such as constructing a customized SciML problem. Most users should prefer `simulation_problem` or `simulate`.
 
+## Optional Plotting
+
+`plot_rigid_body` and `plot_controls` are defined in `src/plotting.jl` and exported without loading a plotting library. Their implementations live in the optional `ACESPlotsExt` package extension, activated when both ACES and Plots are loaded. See the [plotting documentation](plotting.md) for keywords, saved-history behavior, and examples.
+
 ## Shared Model Interface
 
 Every stateful subsystem implements `state_dimension`. Stochastic wind, aerodynamic-residual, and measurement models also implement `noise_dimension`. A stateless implementation should return zero and may use `empty_state` for its drift.

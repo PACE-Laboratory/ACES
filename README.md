@@ -90,6 +90,20 @@ final_rigid_body = state_view(aircraft.rigid_body, final_states.x_rb)
 `state_components(aircraft, x)` returns non-copying named views of those
 blocks.
 
+## Plotting saved results
+
+Install and load Plots to enable the optional plotting extension:
+
+```julia
+using Plots
+
+body_plot = plot_rigid_body(aircraft, solution)
+controls_plot = plot_controls(aircraft, solution; actuator_outputs=true)
+savefig(body_plot, "rigid-body.png")
+```
+
+The functions return plot objects without opening windows or saving files. Rigid-body panels show NED position, native Euler or quaternion attitude coordinates, body translational velocity, and body angular velocity with units. Control plots show `u` by default and optionally `δ`, with generic channel names unless labels and units are supplied. Only saved states are evaluated. Plots is not required for simulation.
+
 ## Aircraft-specific models
 
 Reusable baseline models live under `src/models/`. A model specific to an aircraft should normally live in the user's workspace or in a separate Julia package. Define a concrete subtype and extend the ACES interface functions:
