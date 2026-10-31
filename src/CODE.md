@@ -17,13 +17,15 @@ model = AircraftModel(
     wind=ConstantWind(),
     aerodynamics=Aerodynamics(nominal_aerodynamics),
     actuator=nothing,
-    measurement=measurement_model,
+    measurement=IdealMeasurement(:rigid_body),
     estimator=estimator_model,
     controller=controller_model,
 )
 ```
 
 Set `actuator=nothing` when the ideal relation `δ = u` should be used without an actuator state. In that configuration, both controller methods must ignore their `δ` argument.
+
+The keyword constructor resolves `IdealMeasurement(:rigid_body)` from this aircraft's `state_layout` during construction, including Euler, quaternion, and custom rigid-body state dimensions. The resulting measurement returns a view of the raw rigid-body coordinates, which consumers must treat as read-only; `IdentityEstimator` returns a copy. Other measurement models and `IdealMeasurement(h)` callbacks pass through unchanged. See the [measurement documentation](estimation.md) for standalone evaluation and aliasing details.
 
 `simulation_signals(model, x, t)` evaluates the environment through `environment(model.environment, rb_state.s)`, using only the current inertial position. Custom environment models must implement this two-argument interface and return `(g=..., ρ=...)`. Environment outputs have no explicit time dependence; they can change as the aircraft position changes.
 

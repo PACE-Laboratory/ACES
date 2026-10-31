@@ -50,6 +50,9 @@
 
 Concrete selection of every subsystem used by one simulation.
 
+The keyword constructor resolves `measurement=IdealMeasurement(:rigid_body)`
+to a measurement of this aircraft's raw rigid-body state coordinates.
+
 Set `actuator=nothing` to omit actuator dynamics; core then uses `δ = u` and
 allocates no actuator state. In that configuration, `f_ctrl` and `h_ctrl` must
 not use their `δ` argument. Core enforces the assumption by passing a sentinel
@@ -77,7 +80,7 @@ function AircraftModel(
     estimator::AbstractEstimator,
     controller::AbstractController,
 )
-    return AircraftModel(
+    model = AircraftModel(
         rigid_body,
         environment,
         wind,
@@ -87,6 +90,20 @@ function AircraftModel(
         estimator,
         controller,
     )
+    resolved = _resolve_measurement(measurement, model)
+    resolved === measurement && return model
+    return AircraftModel(
+        rigid_body, environment, wind, aerodynamics, actuator,
+        resolved, estimator, controller,
+    )
+end
+
+_resolve_measurement(measurement::AbstractMeasurementModel, model::AircraftModel) = measurement
+
+function _resolve_measurement(
+    ::IdealMeasurement{_RigidBodyMeasurementSelector}, model::AircraftModel,
+)
+    return IdealMeasurement(_MeasurementStateRange(state_layout(model).rigid_body))
 end
 
 # -----------------------------------------------------------------------------

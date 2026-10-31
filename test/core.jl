@@ -8,6 +8,9 @@ using Test
 module TestAircraftModels
 import ACES
 
+struct CustomDimensionRigidBody <: ACES.AbstractRigidBodyModel end
+ACES.state_dimension(::CustomDimensionRigidBody) = 17
+
 """Position-only environment used to test the top-level extension interface."""
 struct PositionEnvironment <: ACES.AbstractEnvironmentModel end
 
@@ -33,6 +36,36 @@ ACES.M_model(::StatefulForce, v_r, ω_r, x_aero, δ, ρ) =
     zeros(eltype(x_aero), 3)
 ACES.f_aero(::StatefulForce, x_aero, v_r, ω_r, δ, ρ) = -x_aero
 
+end
+
+@testset "Ideal rigid-body measurement selector" begin
+    request = IdealMeasurement(:rigid_body)
+    for rb in (RigidBody(1.0, Matrix{Float64}(I, 3, 3)),
+               RigidBody(1.0, Matrix{Float64}(I, 3, 3); attitude=EulerAngles()),
+               TestAircraftModels.CustomDimensionRigidBody())
+        model = AircraftModel(
+            rigid_body=rb,
+            aerodynamics=Aerodynamics(TestAircraftModels.StatefulForce()),
+            measurement=request,
+            estimator=IdentityEstimator(),
+            controller=FunctionController(2, (args...) -> zeros(2), (args...) -> [0.0]),
+        )
+        n = state_dimension(rb)
+        x = collect(1.0:state_dimension(model))
+        y = @inferred h_meas(model.measurement, empty_state(), x, 0.0)
+        @test y == x[state_layout(model).rigid_body]
+        @test length(y) == n
+        @test length(x) > n
+        @test Base.mightalias(y, x)
+        x[1] = -1.0
+        @test y[1] == -1.0
+        xhat = h_est(model.estimator, empty_state(), y, x, 0.0)
+        @test xhat == y
+        @test !Base.mightalias(xhat, x)
+        @test_throws DimensionMismatch h_meas(model.measurement, empty_state(), zeros(n-1), 0.0)
+        @test_throws DimensionMismatch h_meas(model.measurement, [1.0], x, 0.0)
+        @test state_dimension(model.measurement) == noise_dimension(model.measurement) == 0
+    end
 end
 
 @testset "Core assembly and simulation" begin

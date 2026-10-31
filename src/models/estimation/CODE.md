@@ -10,6 +10,10 @@ This page documents measurement-process and estimator models. See the [estimatio
 measurement = IdealMeasurement((x, t) -> measured_quantities(x, t))
 ```
 
+For ideal measurement of just the rigid-body state, use `measurement=IdealMeasurement(:rigid_body)` in the keyword `AircraftModel` constructor. The constructor resolves the selector using its own `state_layout`, so the rigid-body model can be constructed inline and no callback, dimension lookup, or explicit copy is needed. The output retains the raw integration coordinates (including the selected attitude representation), excludes all other subsystem states, and is a view into the supplied simulation state; consumers must treat it as read-only. `IdentityEstimator` continues to return an independent copy. Other symbol selectors throw `ArgumentError` immediately.
+
+The selector is a configuration request until aircraft construction. For standalone evaluation, call `h_meas(aircraft.measurement, x_meas, x, t)` on the resolved measurement; calling `h_meas` on an unresolved selector throws `ArgumentError`. A resolved measurement is bound to that aircraft's layout; use a fresh `IdealMeasurement(:rigid_body)` request when constructing an aircraft with a different layout. A state shorter than the resolved rigid-body range throws `DimensionMismatch`. The existing callable form retains its callable's output and aliasing behavior unchanged.
+
 `OrnsteinUhlenbeckMeasurement` adds a colored disturbance state to a nominal measurement:
 
 ```julia

@@ -6,6 +6,11 @@ using Test
     ideal = IdealMeasurement((x, t) -> x[1:2])
     @test h_meas(ideal, empty_state(), [1.0, 2.0], 0.0) == [1.0, 2.0]
     @test isempty(f_meas(ideal, empty_state(), zeros(2), 0.0))
+    @test_throws ArgumentError IdealMeasurement(:unknown)
+    selector = IdealMeasurement(:rigid_body)
+    @test state_dimension(selector) == 0
+    @test noise_dimension(selector) == 0
+    @test_throws ArgumentError h_meas(selector, empty_state(), zeros(13), 0.0)
 
     colored = OrnsteinUhlenbeckMeasurement(
         0.5,

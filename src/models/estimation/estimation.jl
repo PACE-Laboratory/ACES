@@ -12,13 +12,45 @@
 # `estimator` to AircraftModel.
 
 """
+    IdealMeasurement(h)
+    IdealMeasurement(:rigid_body)
+
 Stateless, deterministic measurement `y_meas = h(x, t)`.
 
 The callable `h` owns any application-specific mapping from the complete
 simulation state to quantities such as actuator configuration.
+
+The selector `:rigid_body` is resolved by the keyword `AircraftModel`
+constructor using that aircraft's state layout. It reports the raw rigid-body
+coordinates as a view into `x`, which callers must treat as read-only.
+Use the resolved `aircraft.measurement` for direct `h_meas` calls;
+an unresolved selector cannot be evaluated. Other symbols are rejected.
 """
 struct IdealMeasurement{H} <: AbstractMeasurementModel
     h::H
+end
+
+# Mark an unresolved request without capturing a partially constructed aircraft.
+struct _RigidBodyMeasurementSelector end
+
+function IdealMeasurement(selector::Symbol)
+    selector === :rigid_body ||
+        throw(ArgumentError("unsupported ideal measurement selector: $selector; expected :rigid_body"))
+    return IdealMeasurement(_RigidBodyMeasurementSelector())
+end
+
+(::_RigidBodyMeasurementSelector)(x, t) = throw(ArgumentError(
+    "IdealMeasurement(:rigid_body) must be resolved by the keyword AircraftModel constructor before evaluation",
+))
+
+struct _MeasurementStateRange
+    indices::UnitRange{Int}
+end
+
+function (selection::_MeasurementStateRange)(x::AbstractVector, t)
+    length(x) >= last(selection.indices) ||
+        throw(DimensionMismatch("x is too short for the rigid-body measurement"))
+    return @view x[selection.indices]
 end
 
 state_dimension(::IdealMeasurement) = 0
