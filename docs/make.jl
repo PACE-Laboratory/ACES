@@ -70,10 +70,12 @@ makedocs(
     ],
     # Emit links to concrete HTML files so the site also works when opened
     # directly from docs/build/ without a local web server.
-    format = Documenter.HTML(prettyurls = false),
+    format = Documenter.HTML(prettyurls = false, edit_link = "main"),
 )
 
-deploydocs(
-    repo = "github.com/PACE-Laboratory/ACES.git",
-    devbranch = "main",
-)
+if get(ENV, "CI", "false") == "true"
+    deploydocs(
+        repo = "github.com/PACE-Laboratory/ACES.git",
+        devbranch = "main",
+    )
+end
