@@ -60,6 +60,28 @@ where $\phi$, $\theta$, and $\psi$ are the roll, pitch, and yaw angles of the ai
 	\end{bmatrix}
 ```
 
+### Euler Angles from a Rotation
+
+Independent of the input attitude representation, the rotation $\bm{R}_\mathrm{IB}=[r_{ij}]$ determines principal Euler angles. With $c_\theta=\sqrt{r_{11}^2+r_{21}^2}$, the nonsingular inverse of the rotation above is
+
+```math
+\theta=\operatorname{atan2}(-r_{31},c_\theta),\qquad \phi=\operatorname{atan2}(r_{32},r_{33}),\qquad \psi=\operatorname{atan2}(r_{21},r_{11})
+```
+
+This chooses $\theta\in[-\pi/2,\pi/2]$ and $\phi,\psi\in[-\pi,\pi]$. At gimbal lock, $c_\theta=0$, roll and yaw are not separately determined. A representative of the same rotation is selected by
+
+```math
+\phi=\operatorname{atan2}(-r_{23},r_{22}),\qquad \psi=0
+```
+
+For numerical stability near gimbal lock, roll can equivalently be recovered after removing the selected yaw, using matrix entries that do not vanish with $c_\theta$:
+
+```math
+\phi=\operatorname{atan2}(\sin\psi\,r_{13}-\cos\psi\,r_{23},\cos\psi\,r_{22}-\sin\psi\,r_{12})
+```
+
+This inverse is a coordinate conversion, does not alter the saved state or dynamics, and does not impose continuity across principal-angle branch cuts.
+
 ### Unit Quaternions
 
 Consider two quaternions $q = q_0 + q_1 \hat{i} + q_2 \hat{j} + q_3 \hat{k}$ and $p = p_0 + p_1 \hat{i} + p_2 \hat{j} + p_3 \hat{k}$, represented as the column vectors

@@ -14,6 +14,17 @@ end
 ENV["GKSwstype"] = "100"
 using Plots
 
+# Forward rotation composition for inputs, independent of the inverse plotting
+# conversion under test.
+function plotting_quaternion(angles)
+    φ, θ, ψ = angles
+    sφ, cφ = sincos(φ / 2)
+    sθ, cθ = sincos(θ / 2)
+    sψ, cψ = sincos(ψ / 2)
+    return [cφ*cθ*cψ + sφ*sθ*sψ, sφ*cθ*cψ - cφ*sθ*sψ,
+            cφ*sθ*cψ + sφ*cθ*sψ, cφ*cθ*sψ - sφ*sθ*cψ]
+end
+
 function plotting_fixture(attitude; channels=2, actuator=nothing, calls=Ref(0), output=identity)
     rigid_body = RigidBody(1.0, Matrix{Float64}(I, 3, 3); attitude=attitude)
     controller = FunctionController(
@@ -40,7 +51,8 @@ function plotting_fixture(attitude; channels=2, actuator=nothing, calls=Ref(0), 
         estimator=IdentityEstimator(),
         controller=controller,
     )
-    native = attitude isa EulerAngles ? [0.2, -0.3, 0.4] : [0.5, 0.5, -0.5, 0.5]
+    angles = [0.2, -0.3, 0.4]
+    native = attitude isa EulerAngles ? angles : plotting_quaternion(angles)
     x_rb = vcat([10.0, 20.0, -30.0], native, [4.0, 5.0, 6.0], [0.1, 0.2, 0.3])
     x_act = isnothing(actuator) ? Float64[] : fill(0.25, state_dimension(actuator))
     x0 = initial_state(model; x_rb=x_rb, x_act=x_act, x_ctrl=[-999.0], x_meas=[0.75])
@@ -56,7 +68,7 @@ end
 
     for attitude in (EulerAngles(), UnitQuaternion())
         calls = Ref(0)
-        model, solution, native = plotting_fixture(attitude; calls=calls)
+        model, solution, _ = plotting_fixture(attitude; calls=calls)
         before = deepcopy(solution)
         body = plot_rigid_body(model, solution; size=(900, 600))
         @test body isa Plots.Plot
@@ -67,11 +79,12 @@ end
         @test body[1].series_list[1][:x] == solution.t
         @test body[1].series_list[1][:y] == [10.0, 10.0, 15.0]
         @test body[1].series_list[3][:y] == fill(-30.0, 3)
-        @test length(body[2].series_list) == length(native)
-        for i in eachindex(native)
-            @test body[2].series_list[i][:y] == fill(native[i], 3)
+        @test length(body[2].series_list) == 3
+        for (i, angle) in enumerate([0.2, -0.3, 0.4])
+            @test body[2].series_list[i][:y] ≈ fill(angle, 3)
+            @test body[2].series_list[i][:label] == ("Roll φ", "Pitch θ", "Yaw ψ")[i]
         end
-        @test body[2][:yaxis][:guide] == (attitude isa EulerAngles ? "rad" : "1")
+        @test body[2][:yaxis][:guide] == "rad"
         @test body[3].series_list[1][:y] == fill(4.0, 3)
         @test body[3][:yaxis][:guide] == "m/s"
         @test body[4].series_list[3][:y] == fill(0.3, 3)
@@ -175,6 +188,55 @@ end
     end
 end
 
+@testset "Euler attitude plotting" begin
+    cases = ([0.0, 0.0, 0.0], [0.2, -0.3, 0.4], [π, 0.0, 0.0],
+             [0.0, 0.0, π], [4.2, 0.3, -4.5], [1.0, 2.1, -2.0],
+             [0.7, π/2, -0.8], [0.7, -π/2, -0.8],
+             [0.7, π/2 - 1e-7, -0.8], [0.7, -π/2 + 1e-7, -0.8])
+    for T in (Float32, Float64), attitude in (EulerAngles(), UnitQuaternion())
+        model, short, _ = plotting_fixture(attitude)
+        angles = [T.(value) for value in cases]
+        states = map(angles) do value
+            native = attitude isa EulerAngles ? value : plotting_quaternion(value)
+            T.(vcat([10, 20, -30], native, [4, 5, 6], [0.1, 0.2, 0.3],
+                    short.u[1][(state_dimension(model.rigid_body) + 1):end]))
+        end
+        history = (t=fill(0.0, length(states)), u=states)
+        before = deepcopy(history)
+        figure = plot_rigid_body(model, history)
+        @test length(figure[2].series_list) == 3
+        @test figure[2][:yaxis][:guide] == "rad"
+        for (i, value) in enumerate(angles)
+            plotted = [series[:y][i] for series in figure[2].series_list]
+            @test all(isfinite, plotted)
+            @test abs(plotted[1]) <= π + 4eps(T)
+            @test abs(plotted[2]) <= π/2 + 4eps(T)
+            @test abs(plotted[3]) <= π + 4eps(T)
+            @test R_IB(EulerAngles(), plotted) ≈ R_IB(EulerAngles(), value) atol=50eps(T) rtol=50eps(T)
+        end
+        # Both pitch singularities select zero yaw, without losing the rotation.
+        @test figure[2].series_list[3][:y][7:8] == zeros(2)
+        @test history == before
+    end
+
+    # Equivalent quaternion signs/scales must give the same Euler histories.
+    model, short, _ = plotting_fixture(UnitQuaternion())
+    q = plotting_quaternion([0.2, -0.3, 0.4])
+    states = map((1.0, -1.0, 2.0, -3.0)) do scale
+        state = copy(first(short.u))
+        state_components(model, state).x_rb[4:7] .= scale .* q
+        state
+    end
+    history = (t=[0.0, 0.5, 0.5, 1.0], u=collect(states))
+    before = deepcopy(history)
+    figure = plot_rigid_body(model, history)
+    for (channel, expected) in enumerate([0.2, -0.3, 0.4])
+        @test figure[2].series_list[channel][:x] == history.t
+        @test figure[2].series_list[channel][:y] ≈ fill(expected, 4)
+    end
+    @test history == before
+end
+
 @testset "Dynamic saved-history assembly" begin
     assemble = Base.get_extension(ACES, :ACESPlotsExt)._channel_matrix
     # Guard the representation itself as well as the public plots below: the
@@ -200,19 +262,20 @@ end
     for n in (3001, 10001), attitude in (EulerAngles(), UnitQuaternion()), static in (false, true)
         @testset "$n samples, $(typeof(attitude)), static=$static" begin
             calls = Ref(0)
-            model, short, native = plotting_fixture(
+            model, short, _ = plotting_fixture(
                 attitude; calls=calls, output=static ? SVector{2} : identity,
             )
             n_pose = pose_dimension(model.rigid_body)
             # Adjacent equal timestamps have distinct states and commands.
             times = [(i - 1) ÷ 2 / 100 for i in 1:n]
+            angles = [[0.2 + 0.1i / n, -0.3 + 0.2i / n, 0.4 - 0.1i / n] for i in 1:n]
             states = map(1:n) do i
                 state = copy(first(short.u))
                 parts = state_components(model, state)
                 parts.x_rb[1:3] .= [i, -i, -2i]
                 parts.x_rb[4:n_pose] .= attitude isa EulerAngles ?
-                    native .+ [8i / n, i / n, -8i / n] :
-                    native .* ((isodd(i) ? -1 : 1) * (1 + i / n))
+                    angles[i] :
+                    plotting_quaternion(angles[i]) .* ((isodd(i) ? -1 : 1) * (1 + i / n))
                 parts.x_rb[(n_pose + 1):(n_pose + 6)] .= [j + i / n for j in 1:6]
                 parts.x_meas[1] = i / n
                 static ? SVector{length(state)}(state) : state
@@ -223,14 +286,20 @@ end
             @test calls[] == 0
             @test length(body.subplots) == 4
             @test body.attr[:show] == false
-            indices = (1:3, 4:n_pose, (n_pose + 1):(n_pose + 3), (n_pose + 4):(n_pose + 6))
-            for (panel, coordinates) in enumerate(indices)
+            indices = ((1, 1:3), (3, (n_pose + 1):(n_pose + 3)), (4, (n_pose + 4):(n_pose + 6)))
+            for (panel, coordinates) in indices
                 @test length(body[panel].series_list) == length(coordinates)
                 for (channel, coordinate) in enumerate(coordinates)
                     series = body[panel].series_list[channel]
                     @test series[:x] == times
                     @test series[:y] == [state[coordinate] for state in states]
                 end
+            end
+            @test length(body[2].series_list) == 3
+            @test body[2][:yaxis][:guide] == "rad"
+            for channel in 1:3
+                @test body[2].series_list[channel][:x] == times
+                @test body[2].series_list[channel][:y] ≈ [value[channel] for value in angles]
             end
 
             # Ideal actuator outputs retain the controller's static/dynamic

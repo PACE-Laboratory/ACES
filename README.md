@@ -102,7 +102,7 @@ controls_plot = plot_controls(aircraft, solution; actuator_outputs=true)
 savefig(body_plot, "rigid-body.png")
 ```
 
-The functions return plot objects without opening windows or saving files. Rigid-body panels show NED position, native Euler or quaternion attitude coordinates, body translational velocity, and body angular velocity with units. Control plots show `u` by default and optionally `δ`, with generic channel names unless labels and units are supplied. Only saved states are evaluated. Plots is not required for simulation.
+The functions return plot objects without opening windows or saving files. Rigid-body panels show NED position, Euler roll/pitch/yaw angles in radians for either Euler or quaternion states, body translational velocity, and body angular velocity with units. Attitude uses principal angles without temporal unwrapping. Control plots show `u` by default and optionally `δ`, with generic channel names unless labels and units are supplied. Only saved states are evaluated. Plots is not required for simulation.
 
 ## Aircraft-specific models
 

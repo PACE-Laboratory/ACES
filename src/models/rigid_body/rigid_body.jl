@@ -90,8 +90,10 @@ end
 
 """
     R_IB(EulerAngles(), Θ)
+    R_IB(Θ)
 
-Return the body-to-inertial rotation matrix for roll-pitch-yaw angles `Θ`.
+Return the body-to-inertial rotation matrix as an `SMatrix{3,3}` for the
+three roll-pitch-yaw angles `Θ` in radians.
 """
 function R_IB(::EulerAngles, Θ::AbstractVector{T}) where {T<:Real}
     length(Θ) == 3 || throw(DimensionMismatch("Θ must have length 3"))
@@ -107,10 +109,39 @@ function R_IB(::EulerAngles, Θ::AbstractVector{T}) where {T<:Real}
 end
 
 """
-    R_IB(UnitQuaternion(), q_IB)
+    q_IB(EulerAngles(), Θ)
+    q_IB(Θ)
 
-Return the body-to-inertial rotation matrix for a nonzero, scalar-first
-quaternion. The input is normalized before evaluation.
+Convert the three roll-pitch-yaw Euler angles `Θ` in radians to a scalar-first
+unit quaternion `[q0, q1, q2, q3]`, returned as an `SVector{4}`. The quaternion
+represents the body-to-inertial rotation `R_IB(EulerAngles(), Θ)`, with its sign
+chosen so that `q0 ≥ 0`. The conversion is also defined at pitch `±π/2`.
+"""
+function q_IB(::EulerAngles, Θ::AbstractVector{T}) where {T<:Real}
+    length(Θ) == 3 || throw(DimensionMismatch("Θ must have length 3"))
+    φ, θ, ψ = Θ
+    sφ, cφ = sincos(φ / 2)
+    sθ, cθ = sincos(θ / 2)
+    sψ, cψ = sincos(ψ / 2)
+    # Compose the same R3(ψ) R2(θ) R1(φ) rotation as the Euler-angle matrix.
+    q = @SVector [
+        cφ*cθ*cψ + sφ*sθ*sψ,
+        sφ*cθ*cψ - cφ*sθ*sψ,
+        cφ*sθ*cψ + sφ*cθ*sψ,
+        cφ*cθ*sψ - sφ*sθ*cψ,
+    ]
+    return q[1] < 0 ? -q : q
+end
+
+q_IB(Θ::AbstractVector{<:Real}) = q_IB(EulerAngles(), Θ)
+
+"""
+    R_IB(UnitQuaternion(), q_IB)
+    R_IB(q_IB)
+
+Return the body-to-inertial rotation matrix as an `SMatrix{3,3}` for a nonzero,
+scalar-first quaternion of length four. The input is normalized before
+evaluation. A zero quaternion throws `ArgumentError`.
 """
 function R_IB(::UnitQuaternion, q_IB::AbstractVector{T}) where {T<:Real}
     length(q_IB) == 4 || throw(DimensionMismatch("q_IB must have length 4"))
@@ -127,8 +158,60 @@ function R_IB(::UnitQuaternion, q_IB::AbstractVector{T}) where {T<:Real}
     ]
 end
 
+function R_IB(attitude::AbstractVector{<:Real})
+    length(attitude) == 3 && return R_IB(EulerAngles(), attitude)
+    length(attitude) == 4 && return R_IB(UnitQuaternion(), attitude)
+    throw(DimensionMismatch("attitude must have length 3 (Euler angles) or 4 (quaternion)"))
+end
+
 R_IB(Θ::SVector{3,<:Real}) = R_IB(EulerAngles(), Θ)
 R_IB(q_IB::SVector{4,<:Real}) = R_IB(UnitQuaternion(), q_IB)
+
+"""
+    Θ(R_IB)
+    Θ(EulerAngles(), angles)
+    Θ(UnitQuaternion(), q_IB)
+    Θ(attitude)
+
+Return principal roll-pitch-yaw Euler angles in radians as an `SVector{3}`,
+using the documented body-to-inertial rotation `R3(ψ) R2(θ) R1(φ)`.
+Accept a real 3 × 3 rotation matrix, three Euler angles, or a nonzero,
+scalar-first quaternion of length four. The vector-only form selects the
+representation by length, as `R_IB(attitude)` does. Quaternion inputs are
+normalized through `R_IB`; inputs are never modified.
+
+Pitch lies in [-π/2, π/2], and roll/yaw lie in [-π, π], without temporal
+unwrapping. At numerical gimbal lock (cosine of pitch no greater than eight
+machine epsilons), choose zero yaw and recover the remaining rotation in roll.
+Matrix inputs must already be rotations; they are not projected onto SO(3).
+Invalid input dimensions throw `DimensionMismatch`; a zero quaternion throws
+`ArgumentError`.
+"""
+function Θ(R_IB::AbstractMatrix{T}) where {T<:Real}
+    size(R_IB) == (3, 3) || throw(DimensionMismatch("R_IB must be 3 × 3"))
+    cθ = hypot(R_IB[1, 1], R_IB[2, 1])
+    θ = atan(-R_IB[3, 1], cθ)
+    if cθ > 8eps(float(T))
+        ψ = atan(R_IB[2, 1], R_IB[1, 1])
+    else
+        # At gimbal lock only a combination of roll and yaw is observable.
+        ψ = zero(θ)
+    end
+    # Remove yaw before extracting roll to retain rotation accuracy near
+    # pitch ±π/2, where R32 and R33 both approach zero.
+    sψ, cψ = sincos(ψ)
+    φ = atan(sψ * R_IB[1, 3] - cψ * R_IB[2, 3], cψ * R_IB[2, 2] - sψ * R_IB[1, 2])
+    return Vec3(φ, θ, ψ)
+end
+
+Θ(::EulerAngles, angles::AbstractVector{<:Real}) = Θ(R_IB(EulerAngles(), angles))
+Θ(::UnitQuaternion, q_IB::AbstractVector{<:Real}) = Θ(R_IB(UnitQuaternion(), q_IB))
+
+function Θ(attitude::AbstractVector{<:Real})
+    length(attitude) == 3 && return Θ(EulerAngles(), attitude)
+    length(attitude) == 4 && return Θ(UnitQuaternion(), attitude)
+    throw(DimensionMismatch("attitude must have length 3 (Euler angles) or 4 (quaternion)"))
+end
 
 # -----------------------------------------------------------------------------
 # Pose kinematics

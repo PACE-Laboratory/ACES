@@ -27,16 +27,18 @@ Private helpers in `ext/ACESPlotsExt.jl` validate the saved history, collect cha
 
 ## Rigid-Body Histories
 
-`plot_rigid_body(model, solution; kwargs...)` supports built-in `RigidBody` models with `EulerAngles` or `UnitQuaternion` attitudes. It uses `state_components` to locate the rigid-body block and `state_view` to decode position and body velocities. Native attitude coordinates are taken from the pose portion of that rigid-body block using `pose_dimension`, without assuming indices in the complete simulation state.
+`plot_rigid_body(model, solution; kwargs...)` supports built-in `RigidBody` models with `EulerAngles` or `UnitQuaternion` attitudes. It uses `state_components` to locate the rigid-body block and `state_view` to decode position, body-to-inertial rotation, and body velocities. The public `Θ(R_IB)` conversion from `src/models/rigid_body/rigid_body.jl` supplies roll, pitch, and yaw for either state representation, without assuming attitude indices in the complete simulation state.
 
 The four default panels show:
 
 - Inertial position: North, East, and Down in meters; Down retains its positive-down sign.
-- Native attitude: roll, pitch, and yaw in radians for Euler models, or scalar-first `q₀`, `q₁`, `q₂`, `q₃` for quaternion models with dimensionless unit `1`.
+- Euler attitude: roll `φ`, pitch `θ`, and yaw `ψ` in radians for both Euler and quaternion models.
 - Inertial translational velocity expressed in body axes, in meters per second.
 - Body angular velocity expressed in body axes, in radians per second.
 
-These follow the [rigid-body theory](../theory/rigid-body.md) and [canonical notation](@ref notation). Attitude samples are plotted as saved, without angle unwrapping, quaternion normalization, or quaternion sign changes. The default layout is a two-by-two grid with time in seconds on the horizontal axes. Custom rigid-body models or attitude representations raise `ArgumentError`.
+These follow the [rigid-body theory](../theory/rigid-body.md) and [canonical notation](@ref notation). Euler angles use the principal branch: pitch is in `[-π/2, π/2]`, and roll and yaw are in `[-π, π]`. There is no temporal angle unwrapping, so branch crossings can produce jumps. At numerical gimbal lock, where the cosine of pitch is no greater than eight machine epsilons of the rotation's floating-point element type, yaw is set to zero and roll captures the remaining rotation. Quaternion decoding uses `state_view`'s normalization and is invariant to quaternion sign or nonzero scaling; saved states are never modified. The default layout is a two-by-two grid with time in seconds on the horizontal axes. Custom rigid-body models or attitude representations raise `ArgumentError`.
+
+The conversion and its numerical behavior belong to the [rigid-body utilities](rigid-body.md). The extension only collects the returned Euler angles into the saved-history matrix.
 
 ## Control and Actuator Histories
 

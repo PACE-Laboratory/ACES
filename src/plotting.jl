@@ -4,11 +4,13 @@
 Plot saved rigid-body position, attitude, body translational velocity, and body
 angular velocity. Load `Plots` to enable this optional extension.
 
-For built-in `RigidBody` models, attitude uses the saved coordinates: roll,
-pitch, and yaw in radians for `EulerAngles`, or scalar-first dimensionless
-components for `UnitQuaternion`. Position uses North-East-Down coordinates in
-meters, body velocity uses m/s, angular velocity uses rad/s, and time uses
-seconds. Saved attitude coordinates are neither normalized nor unwrapped.
+For built-in `RigidBody` models, attitude always shows roll, pitch, and yaw in
+radians, computed by `Θ` from the decoded body-to-inertial rotation for both
+`EulerAngles` and `UnitQuaternion` states. The principal branch has pitch in
+[-π/2, π/2] and roll/yaw in [-π, π], without temporal unwrapping. At gimbal lock,
+yaw is zero and roll represents the remaining rotation. Saved states are not
+modified. Position uses North-East-Down coordinates in meters, body velocity
+uses m/s, angular velocity uses rad/s, and time uses seconds.
 
 `solution` must expose nonempty, equally sized `t` and `u` collections of saved
 times and complete simulation states. No integration or interpolation occurs.

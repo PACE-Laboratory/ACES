@@ -26,7 +26,7 @@ export RealT, Vec3, Vec4, Vec6, Mat3, empty_state, state_dimension,
        noise_dimension
 export AbstractRigidBodyModel, AbstractAttitudeRepresentation,
        EulerAngles, UnitQuaternion, RigidBody, RigidBodyState,
-       pose_dimension, state_view, cpem, cpeminv, R_IB, L_IB, Ξ, Ω,
+       pose_dimension, state_view, cpem, cpeminv, q_IB, R_IB, Θ, L_IB, Ξ, Ω,
        J_η, f_η, ℳ, f_ν, rigid_body_dynamics
 export AbstractEnvironmentModel, AbstractGravityModel, AbstractDensityModel,
        Environment, UniformGravity, ConstantDensity, ExponentialDensity,

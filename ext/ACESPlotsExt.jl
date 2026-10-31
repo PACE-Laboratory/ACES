@@ -28,11 +28,6 @@ function _channel_matrix(values, name)
     return channels
 end
 
-_attitude_labels(::EulerAngles) = ["Roll φ", "Pitch θ", "Yaw ψ"]
-_attitude_labels(::UnitQuaternion) = ["q₀", "q₁", "q₂", "q₃"]
-_attitude_unit(::EulerAngles) = "rad"
-_attitude_unit(::UnitQuaternion) = "1"
-
 function ACES.plot_rigid_body(model::AircraftModel, solution; kwargs...)
     rb = model.rigid_body
     rb isa RigidBody && rb.attitude isa Union{EulerAngles,UnitQuaternion} ||
@@ -40,9 +35,7 @@ function ACES.plot_rigid_body(model::AircraftModel, solution; kwargs...)
     t, x = _saved_history(solution)
     states = [state_components(model, saved).x_rb for saved in x]
     body = [state_view(rb, saved) for saved in states]
-    # Native attitude coordinates belong to η = [s; attitude], within the
-    # decoded rigid-body block, never at fixed indices in the extended state.
-    attitude = [copy(@view saved[4:pose_dimension(rb)]) for saved in states]
+    attitude = [Θ(saved.R_IB) for saved in body]
     histories = (
         _channel_matrix([saved.s for saved in body], "position"),
         _channel_matrix(attitude, "attitude"),
@@ -51,12 +44,12 @@ function ACES.plot_rigid_body(model::AircraftModel, solution; kwargs...)
     )
     labels = (
         ["North", "East", "Down"],
-        _attitude_labels(rb.attitude),
+        ["Roll φ", "Pitch θ", "Yaw ψ"],
         ["v₁", "v₂", "v₃"],
         ["ω₁", "ω₂", "ω₃"],
     )
     titles = ("Position (NED)", "Attitude", "Body translational velocity", "Body angular velocity")
-    units = ("m", _attitude_unit(rb.attitude), "m/s", "rad/s")
+    units = ("m", "rad", "m/s", "rad/s")
     p = Plots.plot(; layout=(2, 2), size=(1000, 700), link=:x,
                    xlabel="Time (s)", kwargs..., show=false)
     for panel in eachindex(histories)
