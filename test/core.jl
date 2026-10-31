@@ -8,6 +8,12 @@ using Test
 module TestAircraftModels
 import ACES
 
+"""Position-only environment used to test the top-level extension interface."""
+struct PositionEnvironment <: ACES.AbstractEnvironmentModel end
+
+ACES.environment(::PositionEnvironment, s) =
+    (g=[0.0, 0.0, 2.0], ρ=exp(s[3] / 8_500.0))
+
 struct DensityScaledForce <: ACES.AbstractAerodynamicModel end
 
 ACES.state_dimension(::DensityScaledForce) = 0
@@ -83,6 +89,32 @@ end
     @test deterministic_problem isa ODEProblem
     solution = simulate(aircraft, x0, (0.0, 0.01); abstol=1e-9, reltol=1e-9)
     @test solution.t[end] == 0.01
+
+    @testset "Position-only environment" begin
+        position_aircraft = AircraftModel(
+            rigid_body=rigid_body,
+            environment=TestAircraftModels.PositionEnvironment(),
+            wind=ConstantWind(),
+            aerodynamics=aerodynamics,
+            actuator=nothing,
+            measurement=measurement,
+            estimator=estimator,
+            controller=controller,
+        )
+        position_x0 = copy(x0)
+        position_x0[1:3] .= [100.0, 500.0, -8_500.0]
+        @test isnothing(validate(position_aircraft, position_x0; t=3.0))
+        for t in (0.0, 3.0)
+            position_signals = simulation_signals(position_aircraft, position_x0, t)
+            @test position_signals.g == [0.0, 0.0, 2.0]
+            @test position_signals.ρ ≈ exp(-1)
+            @test position_signals.F ≈ [exp(-1), 0.0, 0.0]
+            position_dx = similar(position_x0)
+            simulation_drift!(position_dx, position_x0, position_aircraft, t)
+            @test position_dx[8:10] ≈ [exp(-1), 0.0, 2.0]
+        end
+        @test simulation_signals(position_aircraft, x0, 3.0).ρ == 1.0
+    end
 
     colored_measurement = OrnsteinUhlenbeckMeasurement(
         0.5,

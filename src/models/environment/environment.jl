@@ -4,7 +4,7 @@
 #
 # Extension point: reusable atmosphere/gravity models may be added here.
 # Project-specific environments can instead subtype AbstractEnvironmentModel in
-# a user file and implement `environment(model, s, t) -> (g=..., ρ=...)`.
+# a user file and implement `environment(model, s) -> (g=..., ρ=...)`.
 # Select one by passing its instance as `environment` to AircraftModel.
 
 """
@@ -69,10 +69,10 @@ struct Environment{G<:AbstractGravityModel,D<:AbstractDensityModel,T<:Real} <:
     h0::T
 end
 
-# Environment constructor
+# Environment (default) constructor
 function Environment(
     gravity_model::AbstractGravityModel=UniformGravity(),
-    density_model::AbstractDensityModel=NASAMetricAtmosphere();
+    density_model::AbstractDensityModel=ConstantDensity();
     h0::Real=0.0,
 )
     return Environment(gravity_model, density_model, float(h0))
@@ -93,14 +93,13 @@ end
 # -----------------------------------------------------------------------------
 
 """Evaluate inertial frame gravitational acceleration."""
-function gravity(model::UniformGravity{T}, s::AbstractVector, t::Real=0) where {T}
+function gravity(model::UniformGravity{T}, s::AbstractVector) where {T}
     length(s) == 3 || throw(DimensionMismatch("s must have length 3"))
     return Vec3{T}(zero(T), zero(T), model.g)
 end
 
-"""Evaluate inertial frame gravitational acceleration from an environment."""
-gravity(model::Environment, s::AbstractVector, t::Real=0) =
-    gravity(model.gravity_model, s, t)
+"""Evaluate gravitational acceleration from an environment model."""
+gravity(model::Environment, s::AbstractVector) = gravity(model.gravity_model, s)
 
 # -----------------------------------------------------------------------------
 # Atmospheric density interfaces
@@ -133,10 +132,8 @@ function density(::NASAMetricAtmosphere, h::Real)
     return max(zero(ρ), ρ)
 end
 
-"""Evaluate atmospheric density at an NED position and time."""
-function density(model::Environment, s::AbstractVector, t::Real=0)
-    # Environment models accept NED position, while altitude-only density
-    # models operate on height above mean sea level.
+"""Evaluate atmospheric density from an environment model."""
+function density(model::Environment, s::AbstractVector)
     ρ = density(model.density_model, altitude(s, model.h0))
     ρ >= zero(ρ) || throw(DomainError(ρ, "density models must return ρ ≥ 0"))
     return ρ
@@ -146,6 +143,12 @@ end
 # Environment model interface
 # -----------------------------------------------------------------------------
 
-"""Return the gravitational acceleration and density produced by an environment."""
-environment(model::Environment, s::AbstractVector, t::Real=0) =
-    (g=gravity(model, s, t), ρ=density(model, s, t))
+"""
+    environment(model, s)
+
+Return `(g=..., ρ=...)` at inertial position `s`, without explicit time
+dependence. `g` is inertial-frame gravitational acceleration and `ρ` is
+nonnegative atmospheric density. Custom `AbstractEnvironmentModel` subtypes
+must implement this two-argument interface.
+"""
+environment(model::Environment, s::AbstractVector) = (g=gravity(model, s), ρ=density(model, s))

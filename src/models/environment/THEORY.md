@@ -4,36 +4,27 @@ Symbols and Julia identifiers follow the [canonical notation](@ref notation).
 
 ## Assumptions
 
+- Gravity and atmospheric density depend only on inertial position, with no explicit time dependence.
 - Atmospheric density is a scalar field. The default atmosphere models below are horizontally uniform and stationary, so density depends only on altitude.
 - Wind is handled by the wind model, not by this environmental model.
 
 ## Inputs and Outputs
 
 **Inputs:**
-- Time, $t$
 - Inertial position, $\bm{s} \in \mathbb{R}^3$
 
 **Outputs:**
 - Gravitational acceleration, $\bm{g} \in \mathbb{R}^3$
-- Atmospheric density, $\rho \in \mathbb{R}_{\ge 0}$
-
-## Altitude
-
-The NED frame uses a positive-down third coordinate. Therefore, altitude above mean sea level is
-```math
-    h = h_0 - s_D
-```
-where $h_0$ is the mean-sea-level (MSL) altitude of the inerial frame origin and $s_D$ is the third component of $\bm{s}$.
+- Atmospheric density, $\rho \in \mathbb{R}_{\geq 0}$
 
 ## Gravity Model
 
-The most general environmental gravity output is
+In general, the acceration due to gravity expressed in the inertial frame is
 ```math
-    \bm{g} = \bm{h}_g(\bm{s},t)
+    \bm{g} = \bm{h}_g(\bm{s})
 ```
-with components expressed in the inertial frame.
 
-For local aircraft simulations, the default gravity model is uniform and points in the positive-down NED direction:
+The default gravity model is uniform and points in the $\bm{i}_3$ direction:
 ```math
     \bm{g} = \begin{bmatrix}
         0 \\
@@ -43,16 +34,24 @@ For local aircraft simulations, the default gravity model is uniform and points 
 ```
 where $g$ is the gravitational acceleration magnitude, nominally equal to $9.81~\mathrm{m}/\mathrm{s}^2$.
 
-## Density Models
+!!! note Remark
+    The need to account for the spatial variation of gravity generally indicates that the local NED frame is no longer sufficiently accurate as an inertial approximation. At this level of fidelity, the rigid-body dynamics should be formulated in an ECI frame, or in an ECEF frame with the associated non-inertial terms, including the Coriolis and centrifugal accelerations.
+
+## Density Model
 
 The most general density model is
 ```math
-    \rho = h_\rho(\bm{s},t)
+    \rho = h_\rho(\bm{s})
 ```
 and, for horizontally uniform stationary atmosphere models,
 ```math
     \rho = h_\rho(h)
 ```
+where $h$ denotes the altitude above mean sea level:
+```math
+    h = h_0 - s_D
+```
+where $h_0$ is the mean-sea-level (MSL) altitude of the inerial frame origin and $s_D$ is the third component of $\bm{s}$.
 
 All density models must satisfy $\rho \ge 0$ and return density in $\mathrm{kg}/\mathrm{m}^3$.
 
@@ -64,9 +63,9 @@ A simple altitude-only density model is
 ```
 where $\rho_0 = \rho(h_0)$ and $h_\mathrm{scale} > 0$ is the density scale height. This model is useful when only monotonic density decay with altitude is needed.
 
-### NASA Metric Standard Atmosphere
+### NASA Standard Atmosphere
 
-The existing standard-atmosphere formula comes from the NASA Glenn metric atmosphere curve fits. The model is defined by altitude zones.
+The existing standard-atmosphere formula comes from the [NASA Glenn metric atmosphere](https://www.grc.nasa.gov/www/k-12/airplane/atmosmet.html) curve fits. The model is defined by altitude zones.
 
 For the troposphere, from the surface of the Earth to $11{,}000~\mathrm{m}$,
 ```math
@@ -98,5 +97,3 @@ In all zones, density is computed from
     \rho = \frac{p}{0.2869(T + 273.1)}
 ```
 where $h$ is in meters, $T$ is in degrees Celsius, $p$ is in kilopascals, and $\rho$ is in $\mathrm{kg}/\mathrm{m}^3$.
-
-Reference: https://www.grc.nasa.gov/www/k-12/airplane/atmosmet.html

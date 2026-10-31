@@ -321,11 +321,12 @@ end
 
 Evaluate derived environment, wind, actuator, estimation, control, and
 aerodynamic signals at one simulation state and time.
+The environment is evaluated from position only, without a time argument.
 """
 function simulation_signals(model::AircraftModel, x::AbstractVector, t::Real)
     states = state_components(model, x)
     rb_state = state_view(model.rigid_body, states.x_rb)
-    env = environment(model.environment, rb_state.s, t)
+    env = environment(model.environment, rb_state.s)
     ϖ = h_w(model.wind, states.x_w, rb_state, t)
     relative = wind_triangle(rb_state, ϖ)
 

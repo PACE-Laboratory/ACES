@@ -25,6 +25,8 @@ model = AircraftModel(
 
 Set `actuator=nothing` when the ideal relation `δ = u` should be used without an actuator state. In that configuration, both controller methods must ignore their `δ` argument.
 
+`simulation_signals(model, x, t)` evaluates the environment through `environment(model.environment, rb_state.s)`, using only the current inertial position. Custom environment models must implement this two-argument interface and return `(g=..., ρ=...)`. Environment outputs have no explicit time dependence; they can change as the aircraft position changes.
+
 ## State Assembly
 
 `state_layout(model)` reports the range occupied by each subsystem in the flat integration state. Use `initial_state` to assemble initial conditions and `state_components` to recover non-copying views:

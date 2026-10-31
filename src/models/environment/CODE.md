@@ -4,10 +4,11 @@ This page documents gravity, atmospheric-density, and composite environment mode
 
 ## Built-In Models
 
-The default `Environment()` combines uniform positive-down gravity with the NASA metric atmosphere:
+The default `Environment()` combines uniform positive-down gravity with constant atmospheric density of `1.225 kg/m³`. Select `NASAMetricAtmosphere()` explicitly to use the NASA metric atmosphere:
 
 ```julia
 default_environment = Environment()
+nasa_environment = Environment(UniformGravity(), NASAMetricAtmosphere())
 
 custom_environment = Environment(
     UniformGravity(9.80665),
@@ -16,7 +17,7 @@ custom_environment = Environment(
 )
 ```
 
-The `h0` keyword is the mean-sea-level altitude of the NED-frame origin. Calling `environment(model, s, t)` returns a named tuple `(g=..., ρ=...)`.
+The `h0` keyword is the mean-sea-level altitude of the NED-frame origin. Calling `environment(model, s)` returns a named tuple `(g=..., ρ=...)`. The interface takes only the model and inertial position, with no time argument or explicit time dependence.
 
 ## Defining Custom Environment Models
 
@@ -27,7 +28,7 @@ struct TabulatedEnvironment <: ACES.AbstractEnvironmentModel
     # tables and interpolation data
 end
 
-ACES.environment(model::TabulatedEnvironment, s, t) = (
+ACES.environment(model::TabulatedEnvironment, s) = (
     g=...,
     ρ=...,
 )
@@ -35,7 +36,7 @@ ACES.environment(model::TabulatedEnvironment, s, t) = (
 
 The returned `g` must be a three-vector expressed in the inertial frame, and `ρ` must be a nonnegative scalar.
 
-Reusable gravity or density components can instead subtype `AbstractGravityModel` or `AbstractDensityModel` and extend `gravity` or `density`. They can then be composed with `Environment`.
+Reusable gravity or density components can instead subtype `AbstractGravityModel` or `AbstractDensityModel` and implement `gravity(model, s)` or `density(model, h)`. They can then be composed with `Environment`, which evaluates gravity at inertial position `s` and density at MSL altitude `altitude(s, model.h0)`. The composite accessors `gravity(model::Environment, s)` and `density(model::Environment, s)` also take only the model and position.
 
 ## Model Types
 

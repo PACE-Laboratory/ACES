@@ -11,8 +11,8 @@ using Test
     @test altitude(s, 100.0) == 1100.0
 
     # Uniform gravity model
-    @test gravity(UniformGravity(), s, 0.0) == [0.0, 0.0, 9.81]
-    @test gravity(UniformGravity(9.807), s, 0.0) == [0.0, 0.0, 9.807]
+    @test gravity(UniformGravity(), s) == [0.0, 0.0, 9.81]
+    @test gravity(UniformGravity(9.807), s) == [0.0, 0.0, 9.807]
 
     # Constant density model
     @test density(ConstantDensity(), 0.0) == 1.225
@@ -26,9 +26,9 @@ using Test
     # NASA Glenn atmospheric model [metric]
     @test density(NASAMetricAtmosphere(), 0.0) ≈ 1.225 atol=0.01
 
-    # Environment constructor and interface
-    env = Environment(UniformGravity(), exponential; h0=0.0)
-    output = environment(env, s, 2.0)
-    @test output.g == [0.0, 0.0, 9.81]
-    @test output.ρ < 1.225
+    # Default environment constructor and interface
+    @test environment(Environment(), s).g == [0.0, 0.0, 9.81]
+    @test gravity(Environment(), s) == [0.0, 0.0, 9.81]
+    @test environment(Environment(), s).ρ == 1.225
+    @test density(Environment(), s) == 1.225
 end

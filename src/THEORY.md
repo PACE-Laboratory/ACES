@@ -43,6 +43,8 @@ A stateless subsystem has zero state dimension and contributes an empty block. F
 
 ## Subsystem Interconnection and Causality
 
+The environment is stateless and depends only on inertial position: $\bm{g}=\bm{h}_g(\bm{s})$ and $\rho=h_\rho(\bm{s})$. These outputs have no explicit time dependence, although they may vary along the aircraft trajectory as $\bm{s}$ changes.
+
 The signal flow of subsystem outputs is shown below. Note that the appropriate components of the simulation state vector $\bm{x}$ are available to all blocks in this diagram.
 
 ![Signal flow of subsystem outputs](../assets/signal-flow.webp)
