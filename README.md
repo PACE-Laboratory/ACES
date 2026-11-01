@@ -29,16 +29,11 @@ The following example constructs a deterministic, zero-aerodynamic-load aircraft
 using ACES
 using LinearAlgebra
 
-rigid_body = RigidBody(1.0, Matrix{Float64}(I, 3, 3))
-
 zero_aerodynamics = QuasiSteadyAerodynamics(
     (v_r, ω_r, x_aero, δ, ρ) -> zeros(eltype(v_r), 3),
     (v_r, ω_r, x_aero, δ, ρ) -> zeros(eltype(v_r), 3),
 )
 
-# This measurement returns the 13 rigid-body states. Because the rigid-body
-# block is first in the extended state, its range is 1:13 in this model.
-measurement = IdealMeasurement((x, t) -> copy(x[1:13]))
 estimator = IdentityEstimator()
 
 # With actuator=nothing, both controller callables must ignore δ. ACES then
@@ -50,12 +45,12 @@ controller = FunctionController(
 )
 
 aircraft = AircraftModel(
-    rigid_body=rigid_body,
+    rigid_body=RigidBody(1.0, Matrix{Float64}(I, 3, 3)),
     environment=Environment(),
     wind=ConstantWind(),
     aerodynamics=Aerodynamics(zero_aerodynamics),
     actuator=nothing,
-    measurement=measurement,
+    measurement=IdealMeasurement(:rigid_body),
     estimator=estimator,
     controller=controller,
 )
@@ -86,9 +81,9 @@ final_states = state_components(aircraft, solution.u[end])
 final_rigid_body = state_view(aircraft.rigid_body, final_states.x_rb)
 ```
 
-`state_layout(aircraft)` reports the range assigned to every subsystem, while
-`state_components(aircraft, x)` returns non-copying named views of those
-blocks.
+`IdealMeasurement(:rigid_body)` automatically selects the raw rigid-body state coordinates using the aircraft's state layout, so no separate rigid-body binding, manual slice, dimension lookup, or explicit copy is needed. Its output is a view into the simulation state that consumers must treat as read-only; `IdentityEstimator` returns an independent copy.
+
+`state_layout(aircraft)` reports the range assigned to every subsystem, while `state_components(aircraft, x)` returns non-copying named views of those blocks.
 
 ## Plotting saved results
 
