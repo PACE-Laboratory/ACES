@@ -2,6 +2,8 @@
 
 This page documents nominal aerodynamic models, stochastic load residuals, and derived fixed-wing air data. See the [aerodynamics theory](../theory/aerodynamics.md) for the force, moment, and residual equations.
 
+The model types and `fixed_wing_air_data` are exported. The evaluation and extension interfaces `F_model`, `M_model`, `f_aero`, `f_res`, `σ_res`, `g_res`, and `aerodynamic_loads` are public but unexported; use `ACES.` qualification or import individual names explicitly.
+
 ## Composing Nominal and Residual Models
 
 `Aerodynamics` combines one nominal model with an optional stochastic residual:

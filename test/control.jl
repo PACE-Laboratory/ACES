@@ -1,4 +1,5 @@
 using ACES
+using ACES: f_ctrl, h_ctrl
 using Test
 
 @testset "Control" begin

@@ -1,4 +1,5 @@
 using ACES
+using ACES: f_meas, σ_meas, h_meas, f_est, h_est
 using LinearAlgebra
 using Test
 

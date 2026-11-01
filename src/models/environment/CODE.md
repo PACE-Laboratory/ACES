@@ -2,6 +2,8 @@
 
 This page documents gravity, atmospheric-density, and composite environment models. See the [environment theory](../theory/environment.md) for the NED altitude convention and atmosphere equations.
 
+The model types and `altitude` are exported. The evaluation and extension interfaces `gravity`, `density`, and `environment` are public but unexported; call them as `ACES.gravity`, `ACES.density`, and `ACES.environment`, or import individual names explicitly.
+
 ## Built-In Models
 
 The default `Environment()` combines uniform positive-down gravity with constant atmospheric density of `1.225 kg/m³`. Select `NASAMetricAtmosphere()` explicitly to use the NASA metric atmosphere:

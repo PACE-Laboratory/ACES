@@ -2,6 +2,8 @@
 
 This page documents deterministic wind fields, stochastic shaping filters, and the wind triangle. See the [wind theory](../theory/wind.md) for frame conventions and the generalized wind definition.
 
+The model types are exported. The evaluation and extension interfaces `f_w`, `σ_w`, and `h_w`, and the utilities `wind_triangle`, `body_wind_gradient`, `wind_angular_velocity`, and `fixed_wing_angular_velocity`, are public but unexported. Use `ACES.` qualification or import individual names explicitly, including callbacks such as `ACES.wind_angular_velocity` passed to `FrozenWindField`.
+
 ## Built-In Models
 
 Use `ConstantWind` for spatially uniform translational and angular wind:

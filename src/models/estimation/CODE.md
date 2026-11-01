@@ -2,6 +2,8 @@
 
 This page documents measurement-process and estimator models. See the [estimation theory](../theory/estimation.md) for the continuous-time measurement and estimator equations.
 
+The model types are exported. The evaluation and extension interfaces `f_meas`, `σ_meas`, `h_meas`, `f_est`, and `h_est` are public but unexported; use `ACES.` qualification or import individual names explicitly.
+
 ## Built-In Measurement Models
 
 `IdealMeasurement` evaluates a deterministic map of the complete extended state:

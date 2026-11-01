@@ -2,6 +2,8 @@
 
 This page documents static, dynamic, and function-defined controllers. See the [control theory](../theory/control.md) for the controller equations and the [simulation theory](../theory/simulation.md#Controller-and-Actuator-Causality) for controller/actuator evaluation order.
 
+The model types are exported. The evaluation and extension interfaces `f_ctrl` and `h_ctrl` are public but unexported; use `ACES.` qualification or import individual names explicitly.
+
 ## Built-In Controllers
 
 `LinearStateFeedback` is stateless and acts on the estimator output:

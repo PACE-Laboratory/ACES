@@ -1,4 +1,5 @@
 using ACES
+using ACES: gravity, density, environment
 using StaticArrays
 using Test
 

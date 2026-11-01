@@ -129,7 +129,7 @@ using .MyAircraftModels
 aerodynamics = Aerodynamics(MyAircraftModels.MyAerodynamics(16.2))
 ```
 
-The same pattern applies to custom wind, actuator, measurement, estimator, controller, environment, and rigid-body models. The `validate` preflight is intended to catch missing methods, incorrect state dimensions, invalid diffusion blocks, and unsupported controller/actuator signal dependencies before integration starts.
+The same pattern applies to custom wind, actuator, measurement, estimator, controller, environment, and rigid-body models. Model evaluation hooks such as `F_model`, `f_aero`, and `h_ctrl` are public but unexported: use `ACES.` qualification or explicitly import the names you need. Model types, simulation entry points, state-access functions, and attitude conversions remain available through `using ACES`. The `validate` preflight is intended to catch missing methods, incorrect state dimensions, invalid diffusion blocks, and unsupported controller/actuator signal dependencies before integration starts.
 
 ## Documentation
 

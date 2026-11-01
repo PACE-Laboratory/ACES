@@ -2,6 +2,8 @@
 
 This page documents ideal, first-order, and custom actuator models. See the [actuator theory](../theory/actuators.md) and the controller/actuator causality section of the [simulation theory](../theory/simulation.md#Controller-and-Actuator-Causality) for the signal-order contract.
 
+The model types are exported. The evaluation and extension interfaces `actuator_direct_feedthrough`, `f_act`, and `h_act` are public but unexported; use `ACES.` qualification or import individual names explicitly.
+
 ## Selecting Actuator Behavior
 
 There are three common configurations:

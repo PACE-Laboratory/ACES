@@ -1,4 +1,5 @@
 using ACES
+using ACES: cpem, body_wind_gradient, wind_angular_velocity, wind_triangle, f_w, σ_w, h_w
 using LinearAlgebra
 using StaticArrays
 using Test

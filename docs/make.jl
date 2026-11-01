@@ -58,7 +58,7 @@ makedocs(
     sitename = "ACES",
     authors = "Jeremy W. Hopwood",
     modules = [ACES],
-    checkdocs = :exports,
+    checkdocs = :public,
     source = "src",
     build = "build",
     pages = [

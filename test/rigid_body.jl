@@ -1,4 +1,5 @@
 using ACES
+using ACES: pose_dimension, cpem, cpeminv, L_IB, Ξ, Ω, J_η, ℳ, rigid_body_dynamics
 using LinearAlgebra
 using StaticArrays
 using Test

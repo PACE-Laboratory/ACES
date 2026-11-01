@@ -2,6 +2,8 @@
 
 This page documents the rigid-body model and attitude-coordinate utilities. See the [rigid-body theory](../theory/rigid-body.md) for frame conventions, kinematics, and Newton–Euler equations.
 
+`state_view`, the model types, and the attitude conversions `q_IB`, `R_IB`, and `Θ` are exported. The lower-level interfaces `pose_dimension`, `cpem`, `cpeminv`, `L_IB`, `Ξ`, `Ω`, `J_η`, `f_η`, `ℳ`, `f_ν`, and `rigid_body_dynamics` are public but unexported; use qualified calls such as `ACES.ℳ(model)` or import individual names explicitly.
+
 ## Selecting an Attitude Representation
 
 `RigidBody` supports scalar-first unit quaternions by default and roll-pitch-yaw Euler angles as an alternative:

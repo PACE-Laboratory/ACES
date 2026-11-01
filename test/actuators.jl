@@ -1,4 +1,5 @@
 using ACES
+using ACES: actuator_direct_feedthrough, f_act, h_act
 using Test
 
 @testset "Actuators" begin

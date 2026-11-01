@@ -1,4 +1,5 @@
 using ACES
+using ACES: f_res, g_res, aerodynamic_loads
 using StaticArrays
 using Test
 

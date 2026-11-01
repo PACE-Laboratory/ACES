@@ -6,6 +6,14 @@ This page documents the Julia interface that combines subsystem models into a si
 ACES
 ```
 
+## Exports and Qualified Interfaces
+
+`using ACES` imports model types, `empty_state`, the dimension queries, state-access functions, attitude conversions (`q_IB`, `R_IB`, and `Θ`), `altitude`, `fixed_wing_air_data`, and the aircraft construction, validation, signal, problem, and simulation APIs. These are the names used when configuring a simulation and inspecting its results.
+
+Low-level interfaces are declared `public` without being exported. Call them with `ACES.` or explicitly import the names needed for standalone subsystem evaluation or custom model development. This includes `RealT`, `Vec3`, `Vec4`, `Vec6`, and `Mat3`; rigid-body mathematical operators; environment, wind, aerodynamic, actuator, measurement, estimator, and controller evaluation hooks; and `simulation_drift!` and `simulation_diffusion!`. For example, use `ACES.h_ctrl(...)` to evaluate a controller, `ACES.ℳ(body)` to inspect its generalized mass matrix, or `import ACES: F_model` before extending `F_model` unqualified. Custom models should normally use `import ACES` and qualified method definitions as shown in the subsystem documentation.
+
+Names without an `export` or `public` declaration are implementation details, including solver imports and helpers such as `_controller_actuator_outputs` and `_resolve_measurement`. The documentation build checks all public names, including those that require qualification.
+
 ## Constructing an Aircraft Model
 
 `AircraftModel` stores one concrete implementation of every subsystem. Model selection is explicit: construct the subsystem instances and pass them to the keyword constructor.
@@ -58,7 +66,7 @@ validate(model, x0)
 solution = simulate(model, x0, (0.0, 10.0); abstol=1e-9, reltol=1e-9)
 ```
 
-The in-place drift and diffusion functions are public for advanced workflows such as constructing a customized SciML problem. Most users should prefer `simulation_problem` or `simulate`.
+The in-place functions `ACES.simulation_drift!` and `ACES.simulation_diffusion!` are public but unexported for advanced workflows such as constructing a customized SciML problem. Most users should prefer `simulation_problem` or `simulate`.
 
 ## Saved Results
 

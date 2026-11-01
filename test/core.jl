@@ -1,4 +1,5 @@
 using ACES
+using ACES: h_meas, h_est, simulation_drift!, simulation_diffusion!
 using LinearAlgebra
 using SciMLBase: ODEProblem, SDEProblem
 using Test

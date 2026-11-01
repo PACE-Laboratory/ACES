@@ -21,31 +21,36 @@ include("models/control/control.jl")
 include("core.jl")
 
 # Public API grouped by subsystem in the same order as the includes above.
-export RealT, Vec3, Vec4, Vec6, Mat3, empty_state, state_dimension,
-       noise_dimension
+export empty_state, state_dimension, noise_dimension
 export AbstractRigidBodyModel, AbstractAttitudeRepresentation,
        EulerAngles, UnitQuaternion, RigidBody, RigidBodyState,
-       pose_dimension, state_view, cpem, cpeminv, q_IB, R_IB, Θ, L_IB, Ξ, Ω,
-       J_η, f_η, ℳ, f_ν, rigid_body_dynamics
+       state_view, q_IB, R_IB, Θ
 export AbstractEnvironmentModel, AbstractGravityModel, AbstractDensityModel,
        Environment, UniformGravity, ConstantDensity, ExponentialDensity,
-       NASAMetricAtmosphere, altitude, gravity, density, environment
-export AbstractWindModel, ConstantWind, FrozenWindField, ShapingFilterWind,
-       body_wind_gradient, wind_angular_velocity,
-       fixed_wing_angular_velocity, wind_triangle, f_w, σ_w, h_w
+       NASAMetricAtmosphere, altitude
+export AbstractWindModel, ConstantWind, FrozenWindField, ShapingFilterWind
 export AbstractAerodynamicModel, AbstractAerodynamicResidualModel,
        Aerodynamics, QuasiSteadyAerodynamics, NoAerodynamicResidual,
-       LinearAerodynamicResidual, F_model, M_model, f_aero, f_res, σ_res,
-       g_res, aerodynamic_loads, fixed_wing_air_data
-export AbstractActuatorModel, DirectActuator, FirstOrderActuator,
-       actuator_direct_feedthrough, f_act, h_act
+       LinearAerodynamicResidual, fixed_wing_air_data
+export AbstractActuatorModel, DirectActuator, FirstOrderActuator
 export AbstractMeasurementModel, AbstractEstimator, IdealMeasurement,
-       OrnsteinUhlenbeckMeasurement, IdentityEstimator, FunctionEstimator,
-       f_meas, σ_meas, h_meas, f_est, h_est
+       OrnsteinUhlenbeckMeasurement, IdentityEstimator, FunctionEstimator
 export AbstractController, LinearStateFeedback, LinearOutputFeedback,
-       FunctionController, f_ctrl, h_ctrl
+       FunctionController
 export AircraftModel, StateLayout, state_layout, state_components,
-       initial_state, validate, simulation_signals, simulation_drift!,
-       simulation_diffusion!, simulation_problem, simulate
+       initial_state, validate, simulation_signals, simulation_problem, simulate
+
+# Supported low-level interfaces require qualification or an explicit import.
+public RealT, Vec3, Vec4, Vec6, Mat3
+public pose_dimension, cpem, cpeminv, L_IB, Ξ, Ω, J_η, f_η, ℳ, f_ν,
+       rigid_body_dynamics
+public gravity, density, environment
+public body_wind_gradient, wind_angular_velocity, fixed_wing_angular_velocity,
+       wind_triangle, f_w, σ_w, h_w
+public F_model, M_model, f_aero, f_res, σ_res, g_res, aerodynamic_loads
+public actuator_direct_feedthrough, f_act, h_act
+public f_meas, σ_meas, h_meas, f_est, h_est
+public f_ctrl, h_ctrl
+public simulation_drift!, simulation_diffusion!
 
 end
