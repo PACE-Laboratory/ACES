@@ -18,18 +18,18 @@ The attitude choice changes the rigid-body state dimension. The unit-quaternion 
 
 `state_view(model, x_rb)` decodes either representation into a common `RigidBodyState` containing position, rotation matrix, body velocity, and body angular velocity. Other subsystems consume this representation and therefore do not need to know which attitude coordinates are integrated.
 
-## Defining a Custom Rigid-Body Model
+## Defining a Custom "Rigid"-Body Model
 
 Aircraft-specific rigid-body formulations normally live in the user's workspace or a separate Julia package:
 
 ```julia
-struct FlexibleMassRigidBody <: ACES.AbstractRigidBodyModel
+struct FlexibleBody <: ACES.AbstractRigidBodyModel
     # application-specific parameters
 end
 
-ACES.state_dimension(model::FlexibleMassRigidBody) = ...
-ACES.state_view(model::FlexibleMassRigidBody, x_rb) = ...
-ACES.rigid_body_dynamics(model::FlexibleMassRigidBody, x_rb, F, M, g) = ...
+ACES.state_dimension(model::FlexibleBody) = ...
+ACES.state_view(model::FlexibleBody, x_rb) = ...
+ACES.rigid_body_dynamics(model::FlexibleBody, x_rb, F, M, g) = ...
 ```
 
 The custom `state_view` result must expose the properties `s`, `R_IB`, `v`, and `ω`, because the environment, wind, and core assembly read those properties. `rigid_body_dynamics` must return a vector with `state_dimension(model)` entries.
@@ -49,13 +49,15 @@ ACES.state_view
 
 ## Rotation and Kinematics Utilities
 
+The function names `R_IB`, `q_IB`, and `Θ` intentionally follow the [canonical notation](@ref notation). When a local variable or argument uses the same mathematical name, qualify the function call as `ACES.R_IB(...)`, `ACES.q_IB(...)`, or `ACES.Θ(...)`. The notation reference includes an example that preserves these names for both functions and computed values.
+
 `q_IB(EulerAngles(), Θ)` converts a real three-vector of roll, pitch, and yaw angles in radians to a scalar-first unit quaternion stored as an `SVector{4}`. The convenience form `q_IB(Θ)` delegates to this explicit representation method. It follows the documented rotation order and chooses the sign with a nonnegative scalar component. The conversion remains defined at pitch `±π/2`, where the Euler-angle rate map is singular.
 
 `R_IB(attitude)` accepts a real vector of length three for Euler angles in radians or length four for a scalar-first quaternion, and returns the body-to-inertial rotation as an `SMatrix{3,3}`. The explicit forms `R_IB(EulerAngles(), Θ)` and `R_IB(UnitQuaternion(), q)` remain available. Quaternion inputs are normalized; zero quaternions throw `ArgumentError`. Invalid vector lengths throw `DimensionMismatch` in both `q_IB` and `R_IB`.
 
 `Θ(R_IB)` converts a real three-by-three body-to-inertial rotation matrix to principal Euler roll, pitch, and yaw in radians as an `SVector{3}`. The overloads `Θ(EulerAngles(), angles)` and `Θ(UnitQuaternion(), q)` first use the corresponding `R_IB` method, and `Θ(attitude)` selects between them by vector length, following the same dispatch pattern as `R_IB`. Static and ordinary vectors and matrices are accepted without modifying their inputs. Quaternion normalization, zero-quaternion errors, and vector-length errors follow `R_IB`; matrices with dimensions other than three-by-three raise `DimensionMismatch`. Matrix inputs are assumed to be rotations and are not projected onto SO(3). Floating-point inputs retain their floating-point element type.
 
-The conversion follows the inverse defined in the [rigid-body theory](../theory/rigid-body.md), with pitch in `[-π/2, π/2]` and roll/yaw in `[-π, π]`, without temporal unwrapping. It computes pitch with `atan(-R[3,1], hypot(R[1,1], R[2,1]))`, selects yaw from the first column when the cosine of pitch exceeds eight machine epsilons of the floating-point element type, and otherwise chooses zero yaw. Roll is recovered after removing yaw, avoiding loss of rotation accuracy near pitch `±π/2`. The plotting extension calls this public conversion rather than implementing its own attitude conversion.
+The conversion follows the inverse defined in the [rigid-body theory](../theory/rigid-body.md), with pitch in `[-π/2, π/2]` and roll/yaw in `[-π, π]`, without temporal unwrapping. It computes pitch with `atan(-R[3,1], hypot(R[1,1], R[2,1]))`, selects yaw from the first column when the cosine of pitch exceeds eight machine epsilons of the floating-point element type, and otherwise chooses zero yaw. Roll is recovered after removing yaw, avoiding loss of rotation accuracy near pitch `±π/2`. Downstream plotting code can use this public conversion without implementing its own attitude conversion.
 
 ```julia
 angles = [0.2, -0.1, 0.3]

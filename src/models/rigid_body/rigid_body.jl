@@ -63,7 +63,7 @@ struct RigidBodyState{T<:Real}
 end
 
 # -----------------------------------------------------------------------------
-# SO(3) and quaternion utilities
+# SO(3) utilities
 # -----------------------------------------------------------------------------
 
 """Return the cross-product equivalent matrix `S(a)`."""
@@ -109,13 +109,56 @@ function R_IB(::EulerAngles, Θ::AbstractVector{T}) where {T<:Real}
 end
 
 """
+    R_IB(UnitQuaternion(), q_IB)
+    R_IB(q_IB)
+
+Return the body-to-inertial rotation matrix as an `SMatrix{3,3}` for a nonzero,
+scalar-first quaternion of length four. The input is normalized before
+evaluation. A zero quaternion throws `ArgumentError`.
+"""
+function R_IB(::UnitQuaternion, q_IB::AbstractVector{T}) where {T<:Real}
+    length(q_IB) == 4 || throw(DimensionMismatch("q_IB must have length 4"))
+    q_norm = norm(q_IB)
+    iszero(q_norm) && throw(ArgumentError("q_IB must be nonzero"))
+    q0, q1, q2, q3 = q_IB / q_norm
+    two = one(T) + one(T)
+    return @SMatrix [
+        q0*q0+q1*q1-q2*q2-q3*q3 two*(q1*q2-q0*q3) two*(q0*q2+q1*q3)
+        two*(q0*q3+q1*q2) q0*q0-q1*q1+q2*q2-q3*q3 two*(q2*q3-q0*q1)
+        two*(q1*q3-q0*q2) two*(q0*q1+q2*q3) q0*q0-q1*q1-q2*q2+q3*q3
+    ]
+end
+
+"""
+    R_IB(attitude::AbstractVector{<:Real})
+
+Return the body-to-inertial rotation matrix as an `SMatrix{3,3}`.
+
+Interpret a length-three vector as 1-2-3 roll-pitch-yaw Euler angles
+`[φ, θ, ψ]` in radians, and a length-four vector as a scalar-first
+quaternion `[q0, q1, q2, q3]`. Three-component inputs are always
+interpreted as Euler angles.
+
+Quaternion inputs are normalized; a zero quaternion throws `ArgumentError`.
+Any other vector length throws `DimensionMismatch`.
+"""
+function R_IB(attitude::AbstractVector{<:Real})
+    length(attitude) == 3 && return R_IB(EulerAngles(), attitude)
+    length(attitude) == 4 && return R_IB(UnitQuaternion(), attitude)
+    throw(DimensionMismatch("attitude must have length 3 (Euler angles) or 4 (quaternion)"))
+end
+R_IB(Θ::SVector{3,<:Real}) = R_IB(EulerAngles(), Θ)
+R_IB(q_IB::SVector{4,<:Real}) = R_IB(UnitQuaternion(), q_IB)
+
+
+"""
     q_IB(EulerAngles(), Θ)
     q_IB(Θ)
 
 Convert the three roll-pitch-yaw Euler angles `Θ` in radians to a scalar-first
 unit quaternion `[q0, q1, q2, q3]`, returned as an `SVector{4}`. The quaternion
 represents the body-to-inertial rotation `R_IB(EulerAngles(), Θ)`, with its sign
-chosen so that `q0 ≥ 0`. The conversion is also defined at pitch `±π/2`.
+chosen so that `q0 ≥ 0`.
 """
 function q_IB(::EulerAngles, Θ::AbstractVector{T}) where {T<:Real}
     length(Θ) == 3 || throw(DimensionMismatch("Θ must have length 3"))
@@ -134,38 +177,6 @@ function q_IB(::EulerAngles, Θ::AbstractVector{T}) where {T<:Real}
 end
 
 q_IB(Θ::AbstractVector{<:Real}) = q_IB(EulerAngles(), Θ)
-
-"""
-    R_IB(UnitQuaternion(), q_IB)
-    R_IB(q_IB)
-
-Return the body-to-inertial rotation matrix as an `SMatrix{3,3}` for a nonzero,
-scalar-first quaternion of length four. The input is normalized before
-evaluation. A zero quaternion throws `ArgumentError`.
-"""
-function R_IB(::UnitQuaternion, q_IB::AbstractVector{T}) where {T<:Real}
-    length(q_IB) == 4 || throw(DimensionMismatch("q_IB must have length 4"))
-    # Normalization keeps the returned matrix on SO(3) despite small numerical
-    # drift in a quaternion state propagated by an ODE solver.
-    q_norm = norm(q_IB)
-    iszero(q_norm) && throw(ArgumentError("q_IB must be nonzero"))
-    q0, q1, q2, q3 = q_IB / q_norm
-    two = one(T) + one(T)
-    return @SMatrix [
-        q0*q0+q1*q1-q2*q2-q3*q3 two*(q1*q2-q0*q3) two*(q0*q2+q1*q3)
-        two*(q0*q3+q1*q2) q0*q0-q1*q1+q2*q2-q3*q3 two*(q2*q3-q0*q1)
-        two*(q1*q3-q0*q2) two*(q0*q1+q2*q3) q0*q0-q1*q1-q2*q2+q3*q3
-    ]
-end
-
-function R_IB(attitude::AbstractVector{<:Real})
-    length(attitude) == 3 && return R_IB(EulerAngles(), attitude)
-    length(attitude) == 4 && return R_IB(UnitQuaternion(), attitude)
-    throw(DimensionMismatch("attitude must have length 3 (Euler angles) or 4 (quaternion)"))
-end
-
-R_IB(Θ::SVector{3,<:Real}) = R_IB(EulerAngles(), Θ)
-R_IB(q_IB::SVector{4,<:Real}) = R_IB(UnitQuaternion(), q_IB)
 
 """
     Θ(R_IB)
