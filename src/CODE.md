@@ -60,9 +60,9 @@ solution = simulate(model, x0, (0.0, 10.0); abstol=1e-9, reltol=1e-9)
 
 The in-place drift and diffusion functions are public for advanced workflows such as constructing a customized SciML problem. Most users should prefer `simulation_problem` or `simulate`.
 
-## Optional Plotting
+## Saved Results
 
-`plot_rigid_body` and `plot_controls` are defined in `src/plotting.jl` and exported without loading a plotting library. Their implementations live in the optional `ACESPlotsExt` package extension, activated when both ACES and Plots are loaded. See the [plotting documentation](plotting.md) for keywords, saved-history behavior, and examples.
+Plotting belongs to downstream aircraft projects. ACES has no plotting API or plotting dependencies. Use `state_components(model, x)` and `state_view(model.rigid_body, x_rb)` to decode saved states, `Θ(rb.R_IB)` for principal Euler angles, and `simulation_signals(model, x, t)` to recover controller commands and actuator outputs at saved times. These public data interfaces support the downstream project's choice of plotting backend; no integration or interpolation is needed to inspect saved histories.
 
 ## Shared Model Interface
 

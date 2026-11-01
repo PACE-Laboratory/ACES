@@ -8,6 +8,29 @@
 - Definitions must state the coordinate frame whenever it is not unambiguous.
 - Local module documentation should link to this file rather than duplicate entries.
 
+## Mathematical Function Names and Local Values
+
+ACES preserves mathematical identifiers for functions so that Julia calls correspond directly to expressions in the theory documents. In particular, `R_IB`, `q_IB`, and `Θ` remain the names of the attitude-conversion functions and may also name their computed values in a local scope.
+
+When a local variable or argument shares a function's name, qualify calls with `ACES.`, for example `R_IB = ACES.R_IB(q_IB)`. An assignment such as `R_IB = R_IB(q_IB)` inside a function makes `R_IB` local throughout that scope, including on the right-hand side, so it cannot resolve the unqualified name to the ACES function. Apply this convention throughout ACES and downstream code whenever mathematical function and value names coincide.
+
+Use `import ACES` when keeping exported mathematical names available for variables in the calling module, and qualify the function calls:
+
+```julia
+import ACES
+
+function attitude_coordinates(angles)
+    q_IB = ACES.q_IB(angles)
+    R_IB = ACES.R_IB(q_IB)
+    Θ = ACES.Θ(R_IB)
+    return (; q_IB, R_IB, Θ)
+end
+
+coordinates = attitude_coordinates([0.2, -0.1, 0.3])
+```
+
+Unqualified calls remain appropriate when no local binding shadows the function. Property access such as `state.R_IB` does not introduce a local binding named `R_IB` and therefore does not shadow the function.
+
 ## Notation and Variable Names
 
 ### Mathematical Symbols and Operators

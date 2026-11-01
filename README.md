@@ -85,19 +85,9 @@ final_rigid_body = state_view(aircraft.rigid_body, final_states.x_rb)
 
 `state_layout(aircraft)` reports the range assigned to every subsystem, while `state_components(aircraft, x)` returns non-copying named views of those blocks.
 
-## Plotting saved results
+## Visualizing saved results
 
-Install and load Plots to enable the optional plotting extension:
-
-```julia
-using Plots
-
-body_plot = plot_rigid_body(aircraft, solution)
-controls_plot = plot_controls(aircraft, solution; actuator_outputs=true)
-savefig(body_plot, "rigid-body.png")
-```
-
-The functions return plot objects without opening windows or saving files. Rigid-body panels show NED position, Euler roll/pitch/yaw angles in radians for either Euler or quaternion states, body translational velocity, and body angular velocity with units. Attitude uses principal angles without temporal unwrapping. Control plots show `u` by default and optionally `δ`, with generic channel names unless labels and units are supplied. Only saved states are evaluated. Plots is not required for simulation.
+Plotting is owned by downstream aircraft projects, such as NonlinearQuadrotor. ACES has no plotting dependencies or plotting API. Decode saved samples with `state_components` and `state_view`, convert rotations with `Θ`, and recover controller commands and actuator outputs with `simulation_signals`. Use the plotting library and publication settings selected by the downstream project.
 
 ## Aircraft-specific models
 
